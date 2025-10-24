@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tasks/core/app_theme.dart';
 import 'package:tasks/core/ttotoy_entity.dart';
-import 'package:tasks/view/ttotoy_detail/ttotoy_detail_page.dart';
+import 'package:tasks/view_todo/todo_detail/todo_detail_page.dart';
 
 class ToDoView extends StatelessWidget {
   const ToDoView({

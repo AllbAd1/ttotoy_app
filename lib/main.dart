@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+
 // import 'package:tasks/core/app_theme.dart'; // ★ 기존 테마 관련 Import는 제거.
 import 'package:ttotoy/theme/app_theme.dart'; // ★ 새로 만든 TtoToy 테마 파일을 Import.
 import 'package:tasks/view/home/home_page.dart'; // HomePage는 나중에 TtoToy의 Splash/Home으로 변경 예정.
+
+
+
+
 
 // App 이름을 MyApp 에서 TtoToyApp으로 변경.
 void main() {
