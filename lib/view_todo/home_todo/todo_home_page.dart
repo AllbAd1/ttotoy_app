@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tasks/core/app_theme.dart';
 import 'package:tasks/core/ttotoy_entity.dart';
-import 'package:tasks/view/home/todo_dialog.dart';
-import 'package:tasks/view/home/no_todo.dart';
-import 'package:tasks/view/home/todo_view.dart';
+import 'package:tasks/view_todo/home_todo/todo_dialog.dart';
+import 'package:tasks/view_todo/home_todo/no_todo.dart';
+import 'package:tasks/view_todo/home_todo/todo_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
