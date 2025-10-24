@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light, // <- 여기를 변경하면 다크, 라이트 모드를 변경 할 수 있습니다
       home: const HomePage(title: '태현`s Tasks'),
     );
   }
