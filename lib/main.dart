@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tasks/core/app_theme.dart';
-import 'package:tasks/view/home/home_page.dart';
+import 'package:tasks/view/home/todo_home_page.dart';
 
 void main() {
   runApp(const MyApp());
