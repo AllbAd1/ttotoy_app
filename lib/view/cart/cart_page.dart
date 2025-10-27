@@ -54,6 +54,7 @@ class _CartPageState extends State<CartPage> {
                   return _CartItemCard(
                     cartItem: cartItem,
                     onQuantityChanged: (delta) => _changeQuantity(index, delta),
+                    onRemove: () => _removeItem(index),
                   );
                 },
               ),
@@ -86,8 +87,18 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
+// ★★★ 장바구니 항목 삭제 기능 추가
+  void _removeItem(int index) {
+    setState(() {
+      _items.removeAt(index);
+    });
+  }
+  // ★★★
+
+
   List<CartItem> _sampleItems() {
-    return [
+    return[];
+    /* return [
       CartItem(
         product: const Product(
           name: 'Baby girl sweater',
@@ -122,6 +133,7 @@ class _CartPageState extends State<CartPage> {
         quantity: 1,
       ),
     ];
+    */
   }
 }
 
@@ -136,10 +148,12 @@ class _CartItemCard extends StatelessWidget {
   const _CartItemCard({
     required this.cartItem,
     required this.onQuantityChanged,
+    required this.onRemove, // ★★★ 삭제 콜백 추가
   });
 
   final CartItem cartItem;
   final ValueChanged<int> onQuantityChanged;
+  final VoidCallback onRemove; // ★★★ 삭제 콜백 정의
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +173,18 @@ class _CartItemCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
+
+// ★★★ 휴지통 아이콘 추가 ★★★
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            color: AppColors.descriptionGray, 
+            onPressed: onRemove, // 삭제 함수 연결
+            padding: EdgeInsets.zero, // 기본 패딩 제거
+            constraints: const BoxConstraints(), // 기본 크기 제한 제거
+          ),
+          const SizedBox(width: 8), // 아이콘과 이미지 간격
+          // ★★★
+
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.asset(
