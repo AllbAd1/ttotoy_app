@@ -39,7 +39,10 @@ class _CartPageState extends State<CartPage> {
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         centerTitle: true,
-        title: const Text('Cart'),
+        title: Text(
+          'Cart',
+          style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
+            ), // 수정된 부분 Cart 폰트 사이즈 20으로 키움.
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
