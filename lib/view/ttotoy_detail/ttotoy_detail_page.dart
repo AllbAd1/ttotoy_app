@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+
+import '../../constants/colors.dart';
+import '../../core/product.dart';
+import '../cart/cart_page.dart';
+
+class ProductDetailPage extends StatelessWidget {
+  const ProductDetailPage({super.key, required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.colorScheme.background,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          product.name,
+          style: theme.textTheme.titleLarge,
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                product.imageAsset,
+                height: 240,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              product.name,
+              style: theme.textTheme.titleLarge?.copyWith(fontSize: 22),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              product.description,
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            _DetailTile(
+              label: 'Baby Size',
+              value: product.size,
+            ),
+            const SizedBox(height: 8),
+            _DetailTile(
+              label: 'Color',
+              value: product.color,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Price',
+                  style: theme.textTheme.titleMedium,
+                ),
+                Text(
+                  '\$${product.price.toStringAsFixed(2)}',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: AppColors.primaryPeach,
+                    fontSize: 22,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => _goToCart(context),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+              ),
+              child: const Text('Add to Cart'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _goToCart(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CartPage(
+          initialItems: [
+            CartItem(product: product, quantity: 1),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailTile extends StatelessWidget {
+  const _DetailTile({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.titleMedium,
+          ),
+          Text(
+            value,
+            style: theme.textTheme.titleLarge,
+          ),
+        ],
+      ),
+    );
+  }
+}
