@@ -33,7 +33,7 @@ class TtoToyApp extends StatelessWidget { // ★ 클래스 이름도 TtoToyApp�
       // 3. 임시로 TtoToy의 첫 화면 (Splash Screen)으로 변경.
       //    (현재는 임시로 텍스트를 보여주지만, 나중에 SplashPage를 만들어서 연결할 예정)
       // home: const HomePage title을 임시로 TtoToy Splash Screen Ready로 변경 - 나중에 변경 예정.
-      home: HomePage());
-    
+      home: HomePage(),
+    );
   }
 }
