@@ -205,7 +205,7 @@ class _CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '\$${cartItem.product.price.toStringAsFixed(2)}',
+                  '₩${cartItem.product.price.round()}', // 원화로 표시
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: AppColors.primaryPeach,
                   ),
@@ -283,7 +283,7 @@ class _CartSummary extends StatelessWidget {
             style: theme.textTheme.titleMedium,
           ),
           Text(
-            '\$${total.toStringAsFixed(2)}',
+            '₩${total.round()}', // 원화로 표시
             style: theme.textTheme.titleLarge?.copyWith(
               color: AppColors.primaryPeach,
               fontSize: 18,
