@@ -3,17 +3,32 @@ import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import '../../core/product.dart';
 import '../cart/cart_page.dart';
+import '../product/add_product_page.dart';
 import '../ttotoy_detail/ttotoy_detail_page.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
-  static final List<Product> _products = [
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  static final List<Product> _seedProducts = [
+    const Product(
+      name: 'Baby Boy Bodysuits Set',
+      description:
+          'Soft cotton bodysuits that keep your baby comfortable all day long.',
+      price: 45.00,
+      imageAsset: 'assets/images/Ttotoy_1.webp',
+      size: '0-3M',
+      color: 'Gray',
+    ),
     const Product(
       name: 'Baby boy bottle',
       description: 'Pelletentesque habit...baby bottle with silicone nipple.',
       price: 12.00,
-      imageAsset: 'assets/images/Ttotoy_logo.webp',
+      imageAsset: 'assets/images/Ttotoy_2.webp',
       size: '0-3M',
       color: 'Gray',
     ),
@@ -21,7 +36,7 @@ class MainPage extends StatelessWidget {
       name: 'Baby boy toy',
       description: 'Sed ac eurt cutabular et. Soft plush toy for tummy time.',
       price: 44.00,
-      imageAsset: 'assets/images/Ttotoy_under_title.webp',
+      imageAsset: 'assets/images/Ttotoy_3.webp',
       size: '3-6M',
       color: 'Yellow',
     ),
@@ -29,11 +44,19 @@ class MainPage extends StatelessWidget {
       name: 'Baby jute toys',
       description: 'Suspendisse sollicitudin classic toy bundle.',
       price: 54.00,
-      imageAsset: 'assets/images/mom_and_baby.webp',
+      imageAsset: 'assets/images/Ttotoy_4.webp',
       size: '6-12M',
       color: 'Pink',
     ),
   ];
+
+  late List<Product> _products;
+
+  @override
+  void initState() {
+    super.initState();
+    _products = List<Product>.from(_seedProducts);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,10 +153,23 @@ class MainPage extends StatelessWidget {
     if (index == 2) {
       _openCart(context, null);
     } else if (index == 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Add Product is coming soon!')),
-      );
+      _openAddProduct(context);
     }
+  }
+
+  void _openAddProduct(BuildContext context) {
+    Navigator.of(context)
+        .push<Product>(
+      MaterialPageRoute(builder: (_) => const AddProductPage()),
+    ).then((product) {
+      if (!mounted || product == null) return;
+      setState(() {
+        _products.insert(0, product);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${product.name} saved.')),
+      );
+    });
   }
 }
 
