@@ -46,7 +46,7 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                Image.asset('assets/images/Ttotoy_under_title.png',
+                Image.asset('assets/images/Ttotoy_under_title.webp',
                       height: 50, // 로고 크기 설정
                     ),
                 const SizedBox(height: 15), // 로고와 버튼 사이 간격
