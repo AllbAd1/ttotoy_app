@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tasks/theme/app_theme.dart';
+import 'package:tasks/view/home/home_page.dart';
 
 // import 'package:tasks/core/app_theme.dart'; // ★ 기존 테마 관련 Import는 제거.
 // import 'package:ttotoy/theme/app_theme.dart'; // ★ 새로 만든 TtoToy 테마 파일을 Import.
@@ -32,11 +33,7 @@ class TtoToyApp extends StatelessWidget { // ★ 클래스 이름도 TtoToyApp�
       // 3. 임시로 TtoToy의 첫 화면 (Splash Screen)으로 변경.
       //    (현재는 임시로 텍스트를 보여주지만, 나중에 SplashPage를 만들어서 연결할 예정)
       // home: const HomePage title을 임시로 TtoToy Splash Screen Ready로 변경 - 나중에 변경 예정.
-      home: const Scaffold(
-        body: Center(
-          child: Text('TtoToy Splash Screen Ready'),
-        ),
-      ),
-    );
+      home: HomePage());
+    
   }
 }
