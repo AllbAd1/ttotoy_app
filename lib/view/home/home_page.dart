@@ -41,7 +41,18 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: SizedBox(
+
+                // >>>>>>>>>>>>>>>>>>유창수 : 여기에 로고와 버튼을 세로로 배치합니다. <<<<<<<<<<<<<<<<<<<<
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                Image.asset('assets/images/Ttotoy_under_title.png',
+                      height: 50, // 로고 크기 설정
+                    ),
+                const SizedBox(height: 15), // 로고와 버튼 사이 간격
+                  // >>>>>>>>>>>>>>>>>>유창수 : 로고 추가 <<<<<<<<<<<<<<<<<<<<
+
+                SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => _goToMainPage(context),
@@ -60,8 +71,10 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
+                ],
               ),
             ),
+          ),
           ),
         ],
       ),
