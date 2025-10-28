@@ -77,7 +77,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 controller: _descriptionController,
                 label: '설명',
                 hint: '설명을 입력 해주세요!',
-                maxLines: 4,
+                maxLines: 6, //   입력칸 늘림
               ),
               const SizedBox(height: 16),
               Row(
@@ -110,7 +110,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildTextField(
                       controller: _sizeController,
                       label: '사용연령',
-                      hint: '예시 0~3M',
+                      hint: '예시 0~3개월', //    영어를 한글로 변경
                     ),
                   ),
                   //    색상 입력칸 삭제
@@ -127,7 +127,7 @@ class _AddProductPageState extends State<AddProductPage> {
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _inventoryController,
-                label: '재고 수량',
+                label: '재고수량', //   '재고 수량' >> '재고수량'으로 변경
                 hint: '',
                 keyboardType: TextInputType.number,
               ),
@@ -169,6 +169,8 @@ class _AddProductPageState extends State<AddProductPage> {
         hintText: hint,
         filled: true,
         fillColor: Colors.white,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //    설명 텍스트 위로 정렬
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -236,7 +238,7 @@ class _AddProductPageState extends State<AddProductPage> {
       imageAsset: _selectedImage!.path, 
       inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
-          ? '0-3M'
+          ? '0-3개월' //    영어를 한글로 변경
           : _sizeController.text.trim(),
       //    컬러 입력칸 삭제
       /*color: (_colorController.text.trim().isEmpty)
