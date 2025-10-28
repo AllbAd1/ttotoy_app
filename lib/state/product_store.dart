@@ -13,8 +13,8 @@ class ProductStore extends ChangeNotifier {
         price: 45000,
         imageAsset: 'assets/images/Ttotoy_1.webp',
         inventory: 5,
-        size: '0-3M',
-        color: '노랑색',
+        size: '0~3개월', //   '0-3M' >> '0~3개월'으로 변경
+       //color: '노랑색', //    컬러 생략
       ),
       const Product(
         name: '케이크모양 장난감',
@@ -22,8 +22,8 @@ class ProductStore extends ChangeNotifier {
         price: 12000,
         imageAsset: 'assets/images/Ttotoy_2.webp',
         inventory: 10,
-        size: '0-3M',
-        color: '흰색',
+        size: '0~3개월', //    '0-3M' >> '0~3개월'으로 변경
+        //color: '흰색',    컬러 생략
       ),
       const Product(
         name: '뽀로로 장난감',
@@ -31,8 +31,8 @@ class ProductStore extends ChangeNotifier {
         price: 44000,
         imageAsset: 'assets/images/Ttotoy_3.webp',
         inventory: 8,
-        size: '3-6M',
-        color: '노란색',
+        size: '3~6개월', //   '3-6M' >> '3~6개월'으로 변경
+        //color: '노란색',    컬러 생략
       ),
       const Product(
         name: '주사위 장난감',
@@ -40,8 +40,8 @@ class ProductStore extends ChangeNotifier {
         price: 54000,
         imageAsset: 'assets/images/Ttotoy_4.webp',
         inventory: 4,
-        size: '6-12M',
-        color: '빨강',
+        size: '6~12개월', //   '6-12M' >> '6~12개월'으로 변경
+       //color: '빨강',   컬러 생략
       ),
     ]);
   }
