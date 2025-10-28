@@ -46,6 +46,8 @@ class VariableColors extends ThemeExtension<VariableColors> {
     Color? background100,
     Color? background200,
     Color? background300,
+    Color? textColor100,
+    Color? textColor200,
   }) => VariableColors(
     background100: background100 ?? this.background100,
     background200: background200 ?? this.background200,

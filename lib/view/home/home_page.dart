@@ -1,82 +1,235 @@
 import 'package:flutter/material.dart';
 
-import 'package:tasks/view/main/main_page.dart';
+import '../../constants/colors.dart';
+import '../../core/product.dart';
+import '../../state/product_store.dart';
+import '../cart/cart_page.dart';
+import '../product/add_product_page.dart';
+import '../ttotoy_detail/ttotoy_detail_page.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  void _goToMainPage(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const MainPage()),
-    );
-  }
+class MainPage extends StatelessWidget {
+  const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final store = ProductProvider.of(context);
+
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/mom_and_baby.webp',
-              fit: BoxFit.cover,
-            ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          'TtoToy',
+          style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart_outlined),
+            color: AppColors.descriptionGray,
+            onPressed: () => _openCart(context, null),
           ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.6),
-                  ],
-                ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SearchBar(theme: theme),
+            const SizedBox(height: 20),
+            Expanded(
+              child: AnimatedBuilder(
+                animation: store,
+                builder: (context, _) {
+                  final products = store.products;
+                  if (products.isEmpty) {
+                    return const Center(child: Text('No products yet.'));
+                  }
+                  return ListView.separated(
+                    itemCount: products.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return _ProductCard(
+                        product: product,
+                        onTap: () => _openDetail(context, product),
+                        onAdd: () => _openCart(context, product),
+                      );
+                    },
+                  );
+                },
               ),
             ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        backgroundColor: theme.colorScheme.surface,
+        selectedItemColor: AppColors.primaryPeach,
+        unselectedItemColor: AppColors.descriptionGray,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_filled),
+            label: 'Home',
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-              child: Align(
-                alignment: Alignment.bottomCenter,
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box_outlined),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag_outlined),
+            label: 'Cart',
+          ),
+        ],
+        onTap: (index) => _handleBottomNavTap(context, index),
+      ),
+    );
+  }
 
-                // >>>>>>>>>>>>>>>>>>유창수 : 여기에 로고와 버튼을 세로로 배치합니다. <<<<<<<<<<<<<<<<<<<<
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                Image.asset('assets/images/Ttotoy_under_title.webp',
-                      height: 50, // 로고 크기 설정
-                    ),
-                const SizedBox(height: 15), // 로고와 버튼 사이 간격
-                  // >>>>>>>>>>>>>>>>>>유창수 : 로고 추가 <<<<<<<<<<<<<<<<<<<<
+  void _openDetail(BuildContext context, Product product) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProductDetailPage(product: product),
+      ),
+    );
+  }
 
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _goToMainPage(context),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                    ),
-                    child: const Text(
-                      '들어가기',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+  void _openCart(BuildContext context, Product? product) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CartPage(
+          initialItems: product == null
+              ? null
+              : [
+                  CartItem(product: product, quantity: 1),
+                ],
+        ),
+      ),
+    );
+  }
+
+  void _handleBottomNavTap(BuildContext context, int index) {
+    if (index == 2) {
+      _openCart(context, null);
+    } else if (index == 1) {
+      _openAddProduct(context);
+    }
+  }
+
+  void _openAddProduct(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AddProductPage()),
+    );
+  }
+}
+
+class _SearchBar extends StatelessWidget {
+  const _SearchBar({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: 'Search',
+        prefixIcon: const Icon(Icons.search),
+        filled: true,
+        fillColor: theme.colorScheme.surface,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductCard extends StatelessWidget {
+  const _ProductCard({
+    required this.product,
+    required this.onTap,
+    required this.onAdd,
+  });
+
+  final Product product;
+  final VoidCallback onTap;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                product.imageAsset,
+                width: 70,
+                height: 70,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    product.description,
+                    style: theme.textTheme.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '\$${product.price.toStringAsFixed(2)}',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: AppColors.primaryPeach,
                     ),
                   ),
-                ),
                 ],
               ),
             ),
-          ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 90,
+              child: ElevatedButton(
+                onPressed: onAdd,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                ),
+                child: const Text('Add'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

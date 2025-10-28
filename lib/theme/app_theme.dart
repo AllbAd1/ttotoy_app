@@ -13,7 +13,6 @@ final ThemeData ttoToyTheme = ThemeData(
   primaryColor: AppColors.primaryPeach,
   colorScheme: ColorScheme.light(
     primary: AppColors.primaryPeach,
-    background: AppColors.backgroundLightGray,
     surface: AppColors.widgetBackgroundWhite,
     onPrimary: AppColors.textWhite, // 버튼 폰트 색상
   ),

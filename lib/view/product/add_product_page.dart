@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
+import '../../state/product_store.dart';
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -204,7 +205,8 @@ class _AddProductPageState extends State<AddProductPage> {
           : _colorController.text.trim(),
     );
 
-    Navigator.of(context).pop(product);
+    ProductProvider.of(context).addProduct(product);
+    Navigator.of(context).pop();
   }
 }
 
@@ -223,7 +225,9 @@ class _PhotoPlaceholder extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.descriptionGray.withOpacity(0.3)),
+          border: Border.all(
+            color: AppColors.descriptionGray.withValues(alpha: 0.3),
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
