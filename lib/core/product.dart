@@ -6,6 +6,7 @@ class Product {
     required this.imageAsset,
     this.size = '0-3M',
     this.color = 'Gray',
+    this.inventory = 0, 
   });
 
   final String name;
@@ -14,4 +15,5 @@ class Product {
   final String imageAsset;
   final String size;
   final String color;
+  final int inventory;
 }

@@ -1,4 +1,8 @@
+// dart:io와 image_picker를 사용하기 위해 추가합니다.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
@@ -12,6 +16,10 @@ class AddProductPage extends StatefulWidget {
 }
 
 class _AddProductPageState extends State<AddProductPage> {
+  // ★★★ 이미지 파일 상태 관리를 위한 변수 추가 ★★★
+  File? _selectedImage;
+  // ★★★
+
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -38,7 +46,7 @@ class _AddProductPageState extends State<AddProductPage> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Product', style: TextStyle(fontSize: 20),),
+        title: const Text('Add Product', style: TextStyle(fontSize: 20)),
         actions: [
           TextButton(
             onPressed: _onSave,
@@ -55,8 +63,12 @@ class _AddProductPageState extends State<AddProductPage> {
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            // ★★★ _selectedImage를 PhotoPlaceholder에 전달 ★★★
             children: [
-              _PhotoPlaceholder(onTap: _onPickPhoto),
+              _PhotoPlaceholder(
+                onTap: _onPickPhoto,
+                imageFile: _selectedImage,
+              ),
               const SizedBox(height: 24),
               _buildTextField(
                 controller: _titleController,
@@ -67,8 +79,7 @@ class _AddProductPageState extends State<AddProductPage> {
               _buildTextField(
                 controller: _descriptionController,
                 label: '설명',
-                hint:
-                    '설명을 입력 해주세요!',
+                hint: '설명을 입력 해주세요!',
                 maxLines: 4,
               ),
               const SizedBox(height: 16),
@@ -78,7 +89,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildTextField(
                       controller: _priceController,
                       label: '가격',
-                      hint: '\₩',
+                      hint: '₩',
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                     ),
@@ -135,7 +146,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: const Text('Save', style: TextStyle(fontSize: 20),),
+            child: const Text('Save', style: TextStyle(fontSize: 20)),
           ),
         ),
       ),
@@ -172,19 +183,37 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  void _onPickPhoto() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Photo picker will be added soon.')),
-    );
+  // ★★★ 이미지 피커 로직으로 대체 ★★★
+  void _onPickPhoto() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
   }
 
   void _onSave() {
     if (_formKey.currentState?.validate() != true) return;
+    
+    // 이미지 선택 검증 로직 추가 (선택 사항)
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an image.')),
+      );
+      return;
+    }
+
     final normalizedPrice =
         _priceController.text.trim().replaceAll(',', '.');
     final priceInput =
         normalizedPrice.replaceAll(RegExp(r'[^0-9.]'), '');
     final price = double.tryParse(priceInput);
+    
+    final inventory = int.tryParse(_inventoryController.text.trim()) ?? 0;
+    
     if (price == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid price.')),
@@ -196,13 +225,16 @@ class _AddProductPageState extends State<AddProductPage> {
       name: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: price,
-      imageAsset: 'assets/images/Ttotoy_5.webp',
+      // 임시로 이미지 에셋 경로 대신 File 경로 사용 (실제 앱에서는 서버 업로드 필요)
+      imageAsset: _selectedImage!.path, 
       size: (_sizeController.text.trim().isEmpty)
           ? '0-3M'
           : _sizeController.text.trim(),
       color: (_colorController.text.trim().isEmpty)
           ? 'Gray'
           : _colorController.text.trim(),
+      // ★★★ 재고 수량 추가 (Product 모델에 inventory 필드가 있어야 함)
+      inventory: inventory, 
     );
 
     ProductProvider.of(context).addProduct(product);
@@ -211,9 +243,10 @@ class _AddProductPageState extends State<AddProductPage> {
 }
 
 class _PhotoPlaceholder extends StatelessWidget {
-  const _PhotoPlaceholder({required this.onTap});
+  const _PhotoPlaceholder({required this.onTap, this.imageFile}); // ★★★ imageFile 추가
 
   final VoidCallback onTap;
+  final File? imageFile; // ★★★ File 타입 변수 추가
 
   @override
   Widget build(BuildContext context) {
@@ -229,23 +262,35 @@ class _PhotoPlaceholder extends StatelessWidget {
             color: AppColors.descriptionGray.withValues(alpha: 0.3),
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_photo_alternate_outlined,
-              color: AppColors.descriptionGray,
-              size: 48,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Photo',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        child: imageFile != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                // ★★★ 선택된 이미지를 화면에 표시 ★★★
+                child: Image.file(
+                  imageFile!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 180,
+                ),
+              )
+            // ★★★ 이미지가 없을 때 기존 플레이스홀더 표시 ★★★
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_outlined,
                     color: AppColors.descriptionGray,
+                    size: 48,
                   ),
-            ),
-          ],
-        ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Photo',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.descriptionGray,
+                        ),
+                  ),
+                ],
+              ),
       ),
     );
   }
