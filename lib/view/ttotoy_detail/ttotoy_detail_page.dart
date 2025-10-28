@@ -54,11 +54,13 @@ class ProductDetailPage extends StatelessWidget {
               value: product.size,
             ),
             const SizedBox(height: 8),
+            /*
             _DetailTile(
               label: '색상',
               value: product.color,
             ),
             const SizedBox(height: 8),
+            */
             _DetailTile(
               label: '재고',
               value: '${product.inventory}개',
