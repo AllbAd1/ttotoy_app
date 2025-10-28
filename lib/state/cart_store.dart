@@ -23,27 +23,41 @@ class CartStore extends ChangeNotifier {
             previousValue + item.product.price * item.quantity,
       );
 
-  void addProduct(Product product, {int quantity = 1}) {
+  bool addProduct(Product product, {int quantity = 1}) {
     final key = _productKey(product);
     final existing = _items[key];
+    final currentQuantity = existing?.quantity ?? 0;
+    final newQuantity = currentQuantity + quantity;
+
+    if (newQuantity > product.inventory) {
+      return false;
+    }
+
     if (existing != null) {
-      existing.quantity += quantity;
+      existing.quantity = newQuantity;
     } else {
       _items[key] = CartItem(product: product, quantity: quantity);
     }
     notifyListeners();
+    return true;
   }
 
-  void changeQuantity(Product product, int delta) {
+  bool changeQuantity(Product product, int delta) {
     final key = _productKey(product);
     final item = _items[key];
-    if (item == null) return;
+    if (item == null) return false;
 
-    item.quantity += delta;
+    final updated = item.quantity + delta;
+    if (updated > product.inventory) {
+      return false;
+    }
+
+    item.quantity = updated;
     if (item.quantity <= 0) {
       _items.remove(key);
     }
     notifyListeners();
+    return true;
   }
 
   void removeProduct(Product product) {
