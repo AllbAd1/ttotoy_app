@@ -21,20 +21,20 @@ class _AddProductPageState extends State<AddProductPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _categoryController = TextEditingController();
+  //final _categoryController = TextEditingController();    카테고리 입력칸 삭제
   final _inventoryController = TextEditingController();
   final _sizeController = TextEditingController();
-  final _colorController = TextEditingController();
+  //final _colorController = TextEditingController();   컬러 입력칸 삭제
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    _categoryController.dispose();
+    //_categoryController.dispose();    카테고리 입력칸 삭제
     _inventoryController.dispose();
     _sizeController.dispose();
-    _colorController.dispose();
+    //_colorController.dispose();   카테고리 입력칸 삭제
     super.dispose();
   }
 
@@ -91,14 +91,16 @@ class _AddProductPageState extends State<AddProductPage> {
                           const TextInputType.numberWithOptions(decimal: true),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  //    카테고리 입력칸 삭제
+                  /*const SizedBox(width: 16),
                   Expanded(
                     child: _buildTextField(
                       controller: _categoryController,
                       label: '카테고리',
                       hint: '남아 or 여아',
                     ),
-                  ),
+                  ), 
+                  */ 
                 ],
               ),
               const SizedBox(height: 16),
@@ -111,14 +113,15 @@ class _AddProductPageState extends State<AddProductPage> {
                       hint: '예시 0~3M',
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  //    색상 입력칸 삭제
+                  /*const SizedBox(width: 16),
                   Expanded(
                     child: _buildTextField(
                       controller: _colorController,
                       label: '색상',
                       hint: '',
                     ),
-                  ),
+                  ),*/
                 ],
               ),
               const SizedBox(height: 16),
@@ -235,9 +238,11 @@ class _AddProductPageState extends State<AddProductPage> {
       size: (_sizeController.text.trim().isEmpty)
           ? '0-3M'
           : _sizeController.text.trim(),
-      color: (_colorController.text.trim().isEmpty)
+      //    컬러 입력칸 삭제
+      /*color: (_colorController.text.trim().isEmpty)
           ? 'Gray'
           : _colorController.text.trim(),
+          */
     );
 
     ProductProvider.of(context).addProduct(product);
