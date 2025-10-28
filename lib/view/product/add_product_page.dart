@@ -1,8 +1,6 @@
-
-import 'dart:io';// dart:io와 image_picker를 사용하기 위해 추가.
-
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart'; // image_picker 패키지 임포트
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
@@ -18,7 +16,6 @@ class AddProductPage extends StatefulWidget {
 class _AddProductPageState extends State<AddProductPage> {
   // ★★★ 이미지 파일 상태 관리를 위한 변수 추가 ★★★
   File? _selectedImage;
-  // ★★★
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -176,7 +173,7 @@ class _AddProductPageState extends State<AddProductPage> {
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Please enter $label';
+          return '$label을(를) 입력해 주세요.';
         }
         return null;
       },
@@ -201,7 +198,7 @@ class _AddProductPageState extends State<AddProductPage> {
     // 이미지 선택 검증
     if (_selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an image.')),
+        const SnackBar(content: Text('이미지를 선택해 주세요.')),
       );
       return;
     }
@@ -212,11 +209,18 @@ class _AddProductPageState extends State<AddProductPage> {
         normalizedPrice.replaceAll(RegExp(r'[^0-9.]'), '');
     final price = double.tryParse(priceInput);
     
-    final inventory = int.tryParse(_inventoryController.text.trim()) ?? 0;
-    
-    if (price == null) {
+    final inventory = int.tryParse(_inventoryController.text.trim());
+
+    if (price == null || price <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid price.')),
+        const SnackBar(content: Text('가격이 올바르지 않습니다.')),
+      );
+      return;
+    }
+    
+    if (inventory == null || inventory <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('재고 수량을 올바르게 입력해 주세요.')),
       );
       return;
     }
@@ -225,7 +229,7 @@ class _AddProductPageState extends State<AddProductPage> {
       name: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: price,
-      // ★★★ 선택된 이미지 파일의 경로를 사용 (실제 앱에서는 서버에 업로드 후 URL 사용) ★★★
+      // ★★★ 선택된 이미지 파일의 경로를 사용 ★★★
       imageAsset: _selectedImage!.path, 
       inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
