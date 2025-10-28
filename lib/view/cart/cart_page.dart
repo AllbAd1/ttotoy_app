@@ -128,8 +128,15 @@ class _CartItemCard extends StatelessWidget {
           const SizedBox(width: 12),
           _QuantityControl(
             quantity: cartItem.quantity,
-            onChanged: (delta) =>
-                cartStore.changeQuantity(cartItem.product, delta),
+            onChanged: (delta) {
+              final success =
+                  cartStore.changeQuantity(cartItem.product, delta);
+              if (!success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('재고 수량을 초과할 수 없어요.')),
+                );
+              }
+            },
           ),
         ],
       ),

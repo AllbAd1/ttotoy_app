@@ -1,8 +1,6 @@
-// dart:io와 image_picker를 사용하기 위해 추가합니다.
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart'; // image_picker 패키지 임포트
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
@@ -18,7 +16,6 @@ class AddProductPage extends StatefulWidget {
 class _AddProductPageState extends State<AddProductPage> {
   // ★★★ 이미지 파일 상태 관리를 위한 변수 추가 ★★★
   File? _selectedImage;
-  // ★★★
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -63,8 +60,8 @@ class _AddProductPageState extends State<AddProductPage> {
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            // ★★★ _selectedImage를 PhotoPlaceholder에 전달 ★★★
             children: [
+              // ★★★ _selectedImage 상태를 PhotoPlaceholder에 전달 ★★★
               _PhotoPlaceholder(
                 onTap: _onPickPhoto,
                 imageFile: _selectedImage,
@@ -176,7 +173,7 @@ class _AddProductPageState extends State<AddProductPage> {
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Please enter $label';
+          return '$label을(를) 입력해 주세요.';
         }
         return null;
       },
@@ -198,10 +195,10 @@ class _AddProductPageState extends State<AddProductPage> {
   void _onSave() {
     if (_formKey.currentState?.validate() != true) return;
     
-    // 이미지 선택 검증 로직 추가 (선택 사항)
+    // 이미지 선택 검증
     if (_selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an image.')),
+        const SnackBar(content: Text('이미지를 선택해 주세요.')),
       );
       return;
     }
@@ -212,11 +209,18 @@ class _AddProductPageState extends State<AddProductPage> {
         normalizedPrice.replaceAll(RegExp(r'[^0-9.]'), '');
     final price = double.tryParse(priceInput);
     
-    final inventory = int.tryParse(_inventoryController.text.trim()) ?? 0;
-    
-    if (price == null) {
+    final inventory = int.tryParse(_inventoryController.text.trim());
+
+    if (price == null || price <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid price.')),
+        const SnackBar(content: Text('가격이 올바르지 않습니다.')),
+      );
+      return;
+    }
+    
+    if (inventory == null || inventory <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('재고 수량을 올바르게 입력해 주세요.')),
       );
       return;
     }
@@ -225,16 +229,15 @@ class _AddProductPageState extends State<AddProductPage> {
       name: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: price,
-      // 임시로 이미지 에셋 경로 대신 File 경로 사용 (실제 앱에서는 서버 업로드 필요)
+      // ★★★ 선택된 이미지 파일의 경로를 사용 ★★★
       imageAsset: _selectedImage!.path, 
+      inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
           ? '0-3M'
           : _sizeController.text.trim(),
       color: (_colorController.text.trim().isEmpty)
           ? 'Gray'
           : _colorController.text.trim(),
-      // ★★★ 재고 수량 추가 (Product 모델에 inventory 필드가 있어야 함)
-      inventory: inventory, 
     );
 
     ProductProvider.of(context).addProduct(product);
@@ -243,7 +246,8 @@ class _AddProductPageState extends State<AddProductPage> {
 }
 
 class _PhotoPlaceholder extends StatelessWidget {
-  const _PhotoPlaceholder({required this.onTap, this.imageFile}); // ★★★ imageFile 추가
+  // ★★★ imageFile 매개변수 추가 ★★★
+  const _PhotoPlaceholder({required this.onTap, this.imageFile}); 
 
   final VoidCallback onTap;
   final File? imageFile; // ★★★ File 타입 변수 추가
