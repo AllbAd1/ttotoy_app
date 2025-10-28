@@ -125,10 +125,17 @@ class HomePage extends StatelessWidget {
     CartStore cartStore,
     Product product,
   ) {
-    cartStore.addProduct(product);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
-    );
+    final added = cartStore.addProduct(product);
+    final messenger = ScaffoldMessenger.of(context);
+    if (added) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
+      );
+    } else {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('재고 수량을 초과하여 담을 수 없어요.')),
+      );
+    }
   }
 }
 
@@ -212,7 +219,13 @@ class _ProductCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
+                  Text(
+                    '재고: ${product.inventory}개',
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(color: AppColors.descriptionGray),
+                  ),
+                  const SizedBox(height: 6),
                   Text(
                     '\₩${product.price.toStringAsFixed(0)}',
                     style: theme.textTheme.titleLarge?.copyWith(
