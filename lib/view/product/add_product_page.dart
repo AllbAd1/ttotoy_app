@@ -38,7 +38,7 @@ class _AddProductPageState extends State<AddProductPage> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Product'),
+        title: const Text('Add Product', style: TextStyle(fontSize: 20),),
         actions: [
           TextButton(
             onPressed: _onSave,
@@ -60,15 +60,15 @@ class _AddProductPageState extends State<AddProductPage> {
               const SizedBox(height: 24),
               _buildTextField(
                 controller: _titleController,
-                label: 'Title',
-                hint: 'Baby Boy Bodysuits Set',
+                label: '이름',
+                hint: '이름을 입력 해주세요!',
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _descriptionController,
-                label: 'Description',
+                label: '설명',
                 hint:
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
+                    '설명을 입력 해주세요!',
                 maxLines: 4,
               ),
               const SizedBox(height: 16),
@@ -77,8 +77,8 @@ class _AddProductPageState extends State<AddProductPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _priceController,
-                      label: 'Price',
-                      hint: '\$45.00',
+                      label: '가격',
+                      hint: '\₩',
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                     ),
@@ -87,8 +87,8 @@ class _AddProductPageState extends State<AddProductPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _categoryController,
-                      label: 'Category',
-                      hint: 'Baby Boy',
+                      label: '카테고리',
+                      hint: '남아 or 여아',
                     ),
                   ),
                 ],
@@ -99,16 +99,16 @@ class _AddProductPageState extends State<AddProductPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _sizeController,
-                      label: 'Size',
-                      hint: '0-3M',
+                      label: '사용연령',
+                      hint: '예시 0~3M',
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildTextField(
                       controller: _colorController,
-                      label: 'Color',
-                      hint: 'Gray',
+                      label: '색상',
+                      hint: '',
                     ),
                   ),
                 ],
@@ -116,8 +116,8 @@ class _AddProductPageState extends State<AddProductPage> {
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _inventoryController,
-                label: 'Inventory',
-                hint: '15',
+                label: '재고 수량',
+                hint: '',
                 keyboardType: TextInputType.number,
               ),
             ],
@@ -135,7 +135,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: const Text('Save'),
+            child: const Text('Save', style: TextStyle(fontSize: 20),),
           ),
         ),
       ),

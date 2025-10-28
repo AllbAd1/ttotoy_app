@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:tasks/view/home/home_page.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class StartPage extends StatelessWidget {
+  const StartPage({super.key});
 
   void _goToMainPage(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const MainPage()),
+      MaterialPageRoute(builder: (_) => const HomePage()),
     );
   }
 
