@@ -18,7 +18,7 @@ class CartPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          '장바구니',
+          'Cart',
           style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
       ),
