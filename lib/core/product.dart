@@ -7,6 +7,7 @@ class Product {
     required this.inventory,
     this.size = '',
     this.color = '',
+    
   });
 
   final String name;
@@ -16,4 +17,5 @@ class Product {
   final int inventory;
   final String size;
   final String color;
+  
 }
