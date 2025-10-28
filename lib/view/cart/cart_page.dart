@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasks/state/product_store.dart';
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
@@ -89,6 +90,8 @@ class _CartPageState extends State<CartPage> {
       }
     });
   }
+
+  
 
 // ★★★ 장바구니 항목 삭제 기능 추가
   void _removeItem(int index) {

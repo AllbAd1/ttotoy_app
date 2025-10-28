@@ -8,37 +8,37 @@ class ProductStore extends ChangeNotifier {
   ProductStore() {
     _products.addAll([
       const Product(
-        name: 'Baby Boy Bodysuits Set',
+        name: '별모양 벨소리 장난감',
         description:
-            'Soft cotton bodysuits that keep your baby comfortable all day long.',
-        price: 45.00,
+            '버튼을 누르면 삐용삐용 소리가 나요',
+        price: 45000,
         imageAsset: 'assets/images/Ttotoy_1.webp',
         size: '0-3M',
-        color: 'Gray',
+        color: '노랑색',
       ),
       const Product(
-        name: 'Baby boy bottle',
-        description: 'Pelletentesque habit...baby bottle with silicone nipple.',
-        price: 12.00,
+        name: '케이크모양 장난감',
+        description: '버튼을 누르면 삐용삐용 소리가 나요',
+        price: 12000,
         imageAsset: 'assets/images/Ttotoy_2.webp',
         size: '0-3M',
-        color: 'Gray',
+        color: '흰색',
       ),
       const Product(
-        name: 'Baby boy toy',
-        description: 'Sed ac eurt cutabular et. Soft plush toy for tummy time.',
-        price: 44.00,
+        name: '뽀로로 장난감',
+        description: '버튼을 누르면 뽀로로가 노래를 불러요',
+        price: 44000,
         imageAsset: 'assets/images/Ttotoy_3.webp',
         size: '3-6M',
-        color: 'Yellow',
+        color: '노란색',
       ),
       const Product(
-        name: 'Baby jute toys',
-        description: 'Suspendisse sollicitudin classic toy bundle.',
-        price: 54.00,
+        name: '주사위 장난감',
+        description: '주사위의 모든면에 버튼을 누르면 소리가 나요',
+        price: 54000,
         imageAsset: 'assets/images/Ttotoy_4.webp',
         size: '6-12M',
-        color: 'Pink',
+        color: '빨강',
       ),
     ]);
   }

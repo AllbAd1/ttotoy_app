@@ -49,12 +49,12 @@ class ProductDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _DetailTile(
-              label: 'Baby Size',
+              label: '사이즈',
               value: product.size,
             ),
             const SizedBox(height: 8),
             _DetailTile(
-              label: 'Color',
+              label: '색상',
               value: product.color,
             ),
             const SizedBox(height: 24),
@@ -62,11 +62,11 @@ class ProductDetailPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Price',
+                  '가격',
                   style: theme.textTheme.titleMedium,
                 ),
                 Text(
-                  '\$${product.price.toStringAsFixed(2)}',
+                  '\₩${product.price.toStringAsFixed(0)}',
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: AppColors.primaryPeach,
                     fontSize: 22,

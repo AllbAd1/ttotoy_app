@@ -13,7 +13,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final store = ProductProvider.of(context);
+    final store = ProductProvider.of(context); //전역상태관리
+
+
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -50,7 +52,8 @@ class HomePage extends StatelessWidget {
                   }
                   return ListView.separated(
                     itemCount: products.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, __) 
+                     {return const SizedBox(height: 12);},
                     itemBuilder: (context, index) {
                       final product = products[index];
                       return _ProductCard(
@@ -209,7 +212,7 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${product.price.toStringAsFixed(2)}',
+                    '\₩${product.price.toStringAsFixed(0)}',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: AppColors.primaryPeach,
                     ),
