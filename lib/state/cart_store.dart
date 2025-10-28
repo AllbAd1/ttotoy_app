@@ -4,6 +4,19 @@ import 'package:flutter/material.dart';
 
 import '../core/product.dart';
 
+import 'package:intl/intl.dart';
+
+//    가격을 ₩20,000 형식의 문자열로 변환하는 함수
+String formatCurrency(double price) {
+  final formatter = NumberFormat.currency(
+    locale: 'ko_KR', //   한국 로케일 사용 (통화 기호와 쉼표 사용)
+    symbol: '₩',    //    통화 기호는 원화 기호(₩)
+    decimalDigits: 0, //    소수점 이하 자리수는 0 (정수만 표시)
+  );
+  return formatter.format(price);
+}
+
+
 class CartItem {
   CartItem({required this.product, this.quantity = 1});
 

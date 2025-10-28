@@ -231,9 +231,11 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '₩${product.price.toStringAsFixed(0)}',
+                   //'₩${product.price.toStringAsFixed(0)}',
+                    formatCurrency(product.price), //   원화 형식 변경 ₩20,000원 형태
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: AppColors.primaryPeach,
+              
                     ),
                   ),
                 ],
