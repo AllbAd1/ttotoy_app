@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
+import '../../state/cart_store.dart';
 import '../cart/cart_page.dart';
 
 class ProductDetailPage extends StatelessWidget {
@@ -76,7 +77,7 @@ class ProductDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => _goToCart(context),
+              onPressed: () => _addToCartAndGo(context),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
               ),
@@ -88,15 +89,14 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  void _goToCart(BuildContext context) {
+  void _addToCartAndGo(BuildContext context) {
+    final cartStore = CartProvider.of(context);
+    cartStore.addProduct(product);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
+    );
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CartPage(
-          initialItems: [
-            CartItem(product: product, quantity: 1),
-          ],
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => const CartPage()),
     );
   }
 }

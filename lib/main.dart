@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
+import 'state/cart_store.dart';
 import 'state/product_store.dart';
 import 'theme/app_theme.dart';
 import 'view/home/start_page.dart';
 
 void main() {
   final productStore = ProductStore();
+  final cartStore = CartStore();
   runApp(
-    ProductProvider(
-      store: productStore,
-      child: const TtoToyApp(),
+    CartProvider(
+      store: cartStore,
+      child: ProductProvider(
+        store: productStore,
+        child: const TtoToyApp(),
+      ),
     ),
   );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
+import '../../state/cart_store.dart';
 import '../../state/product_store.dart';
 import '../cart/cart_page.dart';
 import '../product/add_product_page.dart';
@@ -13,10 +14,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final store = ProductProvider.of(context); //전역상태관리
-
-
-
+    final productStore = ProductProvider.of(context); // 전역 상품 상태
+    final cartStore = CartProvider.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -31,7 +30,7 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined),
             color: AppColors.descriptionGray,
-            onPressed: () => _openCart(context, null),
+            onPressed: () => _openCart(context),
           ),
         ],
       ),
@@ -44,11 +43,11 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
             Expanded(
               child: AnimatedBuilder(
-                animation: store,
+                animation: productStore,
                 builder: (context, _) {
-                  final products = store.products;
+                  final products = productStore.products;
                   if (products.isEmpty) {
-                    return const Center(child: Text('No products yet.'));
+                    return const Center(child: Text('등록된 상품이 없습니다.'));
                   }
                   return ListView.separated(
                     itemCount: products.length,
@@ -59,7 +58,7 @@ class HomePage extends StatelessWidget {
                       return _ProductCard(
                         product: product,
                         onTap: () => _openDetail(context, product),
-                        onAdd: () => _openCart(context, product),
+                        onAdd: () => _addToCart(context, cartStore, product),
                       );
                     },
                   );
@@ -101,23 +100,15 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _openCart(BuildContext context, Product? product) {
+  void _openCart(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CartPage(
-          initialItems: product == null
-              ? null
-              : [
-                  CartItem(product: product, quantity: 1),
-                ],
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => const CartPage()),
     );
   }
 
   void _handleBottomNavTap(BuildContext context, int index) {
     if (index == 2) {
-      _openCart(context, null);
+      _openCart(context);
     } else if (index == 1) {
       _openAddProduct(context);
     }
@@ -126,6 +117,17 @@ class HomePage extends StatelessWidget {
   void _openAddProduct(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const AddProductPage()),
+    );
+  }
+
+  void _addToCart(
+    BuildContext context,
+    CartStore cartStore,
+    Product product,
+  ) {
+    cartStore.addProduct(product);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
     );
   }
 }
