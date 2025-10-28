@@ -83,6 +83,7 @@ class _AddProductPageState extends State<AddProductPage> {
                           const TextInputType.numberWithOptions(decimal: true),
                     ),
                   ),
+                  /*
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildTextField(
@@ -91,6 +92,7 @@ class _AddProductPageState extends State<AddProductPage> {
                       hint: '남아 or 여아',
                     ),
                   ),
+                  */
                 ],
               ),
               const SizedBox(height: 16),
@@ -103,6 +105,7 @@ class _AddProductPageState extends State<AddProductPage> {
                       hint: '예시 0~3M',
                     ),
                   ),
+                  /*
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildTextField(
@@ -111,6 +114,7 @@ class _AddProductPageState extends State<AddProductPage> {
                       hint: '',
                     ),
                   ),
+                  */
                 ],
               ),
               const SizedBox(height: 16),
@@ -192,11 +196,20 @@ class _AddProductPageState extends State<AddProductPage> {
       return;
     }
 
+    final inventory = int.tryParse(_inventoryController.text.trim());
+    if (inventory == null || inventory <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('재고 수량을 올바르게 입력해 주세요.')),
+      );
+      return;
+    }
+
     final product = Product(
       name: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: price,
       imageAsset: 'assets/images/Ttotoy_5.webp',
+      inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
           ? '0-3M'
           : _sizeController.text.trim(),

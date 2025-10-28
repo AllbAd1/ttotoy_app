@@ -50,13 +50,18 @@ class ProductDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _DetailTile(
-              label: '사이즈',
+              label: '사용연령',
               value: product.size,
             ),
             const SizedBox(height: 8),
             _DetailTile(
               label: '색상',
               value: product.color,
+            ),
+            const SizedBox(height: 8),
+            _DetailTile(
+              label: '재고',
+              value: '${product.inventory}개',
             ),
             const SizedBox(height: 24),
             Row(
@@ -91,13 +96,19 @@ class ProductDetailPage extends StatelessWidget {
 
   void _addToCartAndGo(BuildContext context) {
     final cartStore = CartProvider.of(context);
-    cartStore.addProduct(product);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
-    );
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const CartPage()),
-    );
+    final added = cartStore.addProduct(product);
+    if (added) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
+      );
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const CartPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('재고 수량을 초과하여 담을 수 없어요.')),
+      );
+    }
   }
 }
 
