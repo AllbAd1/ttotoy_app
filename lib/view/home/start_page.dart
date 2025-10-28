@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:tasks/view/home/home_page.dart';
+import 'package:ttotoy/view/home/home_page.dart';
 
 class StartPage extends StatelessWidget {
   const StartPage({super.key});
