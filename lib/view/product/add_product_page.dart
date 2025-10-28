@@ -86,7 +86,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildTextField(
                       controller: _priceController,
                       label: '가격',
-                      hint: '₩',
+                      hint: '₩20,000', //    힌트 텍스트 변경 ₩ >> ₩20,000
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                     ),
@@ -110,7 +110,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildTextField(
                       controller: _sizeController,
                       label: '사용연령',
-                      hint: '예시 0~3개월', //    영어를 한글로 변경
+                      hint: '3~6개월', //    영어를 한글로 변경, '예시 0~3개월' >> '3~6개월' 변경
                     ),
                   ),
                   //    색상 입력칸 삭제
@@ -225,7 +225,7 @@ class _AddProductPageState extends State<AddProductPage> {
     
     if (inventory == null || inventory <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('재고 수량을 올바르게 입력해 주세요.')),
+        const SnackBar(content: Text('재고수량을 올바르게 입력해 주세요.')), //   '재고 수량' >> '재고수량' 변경
       );
       return;
     }
