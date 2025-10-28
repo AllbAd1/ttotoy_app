@@ -77,8 +77,8 @@ class CartProvider extends InheritedNotifier<CartStore> {
   const CartProvider({
     super.key,
     required CartStore store,
-    required Widget child,
-  }) : super(notifier: store, child: child);
+    required super.child,
+  }) : super(notifier: store);
 
   static CartStore of(BuildContext context) {
     final provider =

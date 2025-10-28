@@ -26,6 +26,7 @@ class HomePage extends StatelessWidget {
           'TtoToy',
           style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
+        /*
         actions: [
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined),
@@ -33,14 +34,17 @@ class HomePage extends StatelessWidget {
             onPressed: () => _openCart(context),
           ),
         ],
+        */
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /* 검색바 삭제 (주석처리)
             _SearchBar(theme: theme),
             const SizedBox(height: 20),
+            */
             Expanded(
               child: AnimatedBuilder(
                 animation: productStore,
@@ -138,8 +142,8 @@ class HomePage extends StatelessWidget {
     }
   }
 }
-
-class _SearchBar extends StatelessWidget {
+// 검색바 클래스 삭제 (주석처리)
+/*class _SearchBar extends StatelessWidget {
   const _SearchBar({required this.theme});
 
   final ThemeData theme;
@@ -161,7 +165,7 @@ class _SearchBar extends StatelessWidget {
     );
   }
 }
-
+*/
 class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
@@ -227,7 +231,7 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '\₩${product.price.toStringAsFixed(0)}',
+                    '₩${product.price.toStringAsFixed(0)}',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: AppColors.primaryPeach,
                     ),

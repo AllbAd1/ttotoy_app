@@ -74,7 +74,7 @@ class ProductDetailPage extends StatelessWidget {
                   style: theme.textTheme.titleMedium,
                 ),
                 Text(
-                  '\₩${product.price.toStringAsFixed(0)}',
+                  '₩${product.price.toStringAsFixed(0)}',
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: AppColors.primaryPeach,
                     fontSize: 22,
