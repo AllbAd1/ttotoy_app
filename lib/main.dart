@@ -24,7 +24,7 @@ class TtoToyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ttoToyTheme,
       themeMode: ThemeMode.light,
-      home: const HomePage(),
+      home: const StartPage(),
     );
   }
 }

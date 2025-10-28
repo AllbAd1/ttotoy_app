@@ -7,8 +7,8 @@ import '../cart/cart_page.dart';
 import '../product/add_product_page.dart';
 import '../ttotoy_detail/ttotoy_detail_page.dart';
 
-class MainPage extends StatelessWidget {
-  const MainPage({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
