@@ -60,6 +60,7 @@ class CartPage extends StatelessWidget {
                           child: const Text('취소'),
                           ),
                           ElevatedButton(onPressed: (){
+                            cartStore.clear();
                             Navigator.pop(context);
                           }, child: const Text('확인') ),
                         ],
