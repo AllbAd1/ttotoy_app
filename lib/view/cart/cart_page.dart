@@ -1,3 +1,4 @@
+import 'dart:io'; // ★★★ 파일 이미지를 위해 import 추가 ★★★
 import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
@@ -29,7 +30,9 @@ class CartPage extends StatelessWidget {
         builder: (context, _) {
           final items = cartStore.items;
           if (items.isEmpty) {
-            return const Center(child: Text('장바구니가 비어 있어요.'));
+            return const Center(
+              child: Text('장바구니가 비어 있어요.'),
+            );
           }
           final totalPrice = cartStore.totalPrice;
           return Padding(
@@ -52,72 +55,42 @@ class CartPage extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('결제를 하시겠습니까?'),
-                          content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
-                          actions: [
-                            // 1. 취소 버튼을 ElevatedButton으로 수정
-                            ElevatedButton(
-                              // style을 지정하여 버튼의 높이를 약간 줄일 수 있습니다.
-                              // 또는 최소한의 패딩을 주어 작게 보이게 할 수 있습니다.
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(80, 40), // 버튼 크기 지정
-                                backgroundColor:
-                                    Colors.grey.shade200, // 취소 버튼은 배경색을 다르게
-                                foregroundColor: Colors.black87,
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('결제를 하시겠습니까?'),
+                            content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
+                            actions: [
+                              // ★★★ 충돌 해결: ttotoy_jiwon 브랜치 코드 선택 ★★★
+                              // 1. 취소 버튼 (ElevatedButton)
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(80, 40), // 버튼 크기 지정
+                                  backgroundColor:
+                                      Colors.grey.shade200, // 취소 버튼은 배경색을 다르게
+                                  foregroundColor: Colors.black87,
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('취소'),
                               ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('취소'),
-                            ),
 
-                            // 2. 확인 버튼 (이미 ElevatedButton이었지만 스타일을 통일할 수 있습니다)
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(80, 40), // 버튼 크기 지정
-                                // 확인 버튼은 Primary 색상 (테마 색상)을 유지합니다.
+                              // 2. 확인 버튼 (ElevatedButton)
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(80, 40), // 버튼 크기 지정
+                                  // 확인 버튼은 Primary 색상 (테마 색상)을 유지합니다.
+                                ),
+                                onPressed: () {
+                                  cartStore.clear();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('확인'),
                               ),
-                              onPressed: () {
-                                cartStore.clear();
-                                Navigator.pop(context);
-                              },
-                              child: const Text('확인'),
-
-                              /*actions: [
-                            //    취소 버튼 (왼쪽에 배치)
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('취소'),
-                            ),
-                            //    확인 버튼 (오른쪽에 배치, 액션 실행)
-                            TextButton(
-                              // <-- ElevatedButton 대신 TextButton 사용
-                              onPressed: () {
-                                cartStore.clear();
-                                Navigator.pop(context);
-                              },
-                              child: const Text('확인'),*/
-                              //   확인 취소 둘 다 텍스트버젼일 때
-
-                              /* actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('취소'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                cartStore.clear();
-                                Navigator.pop(context);
-                              },
-                              child: const Text('확인'), */
-                              //    처음 방식
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                              // ★★★ (충돌 마커 및 main 브랜치 코드 제거) ★★★
+                            ],
+                          );
+                        });
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 54),
@@ -173,11 +146,10 @@ class _CartItemCard extends StatelessWidget {
           const SizedBox(width: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              cartItem.product.imageAsset,
+            child: _CartProductImage(
+              imageUrl: cartItem.product.imageAsset,
               width: 70,
               height: 70,
-              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 12),
@@ -185,7 +157,10 @@ class _CartItemCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(cartItem.product.name, style: theme.textTheme.titleLarge),
+                Text(
+                  cartItem.product.name,
+                  style: theme.textTheme.titleLarge,
+                ),
                 const SizedBox(height: 4),
                 Text(
                   currencyFormat.format(cartItem.product.price),
@@ -201,7 +176,8 @@ class _CartItemCard extends StatelessWidget {
           _QuantityControl(
             quantity: cartItem.quantity,
             onChanged: (delta) {
-              final success = cartStore.changeQuantity(cartItem.product, delta);
+              final success =
+                  cartStore.changeQuantity(cartItem.product, delta);
               if (!success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('재고 수량을 초과할 수 없어요.')),
@@ -239,7 +215,10 @@ class _QuantityControl extends StatelessWidget {
             color: theme.colorScheme.primary,
             onPressed: () => onChanged(-1),
           ),
-          Text('$quantity', style: theme.textTheme.titleMedium),
+          Text(
+            '$quantity',
+            style: theme.textTheme.titleMedium,
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             color: theme.colorScheme.primary,
@@ -275,7 +254,10 @@ class _CartSummary extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('합계', style: theme.textTheme.titleMedium),
+          Text(
+            '합계',
+            style: theme.textTheme.titleMedium,
+          ),
           Text(
             currencyFormat.format(total),
             //'₩${total.toStringAsFixed(0)}',
@@ -287,5 +269,85 @@ class _CartSummary extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 (변경 없음) ★★★
+class _CartProductImage extends StatelessWidget {
+  const _CartProductImage({
+    required this.imageUrl,
+    this.width = 70.0,
+    this.height = 70.0,
+  });
+
+  final String imageUrl;
+  final double width;
+  final double height;
+
+  // 공통 에러 위젯
+  Widget _buildErrorWidget() {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey[200],
+      child: Icon(
+        Icons.broken_image_outlined,
+        color: Colors.grey[400],
+        size: 40,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl.startsWith('http')) {
+      // 1. 인터넷 URL 이미지
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            width: width,
+            height: height,
+            color: Colors.grey[200],
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else if (imageUrl.startsWith('assets/')) {
+      // 2. 앱 내부 에셋 이미지
+      return Image.asset(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else {
+      // 3. 기기 갤러리에서 가져온 로컬 파일 이미지
+      final file = File(imageUrl);
+      if (imageUrl.isNotEmpty && file.existsSync()) {
+        return Image.file(
+          file,
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildErrorWidget();
+          },
+        );
+      } else {
+        // 4. 경로가 잘못되었거나 파일이 없는 경우
+        return _buildErrorWidget();
+      }
+    }
   }
 }
