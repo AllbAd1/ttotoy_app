@@ -108,12 +108,10 @@ class ProductDetailPage extends StatelessWidget {  // StatelessWidget 사용
     final cartStore = CartProvider.of(context);  // CartStore 가져오기
     final added = cartStore.addProduct(product); // 장바구니에 상품 추가 시도
     if (added) {
-      // ★★★ 충돌 해결: duration을 명시한 코드 선택 ★★★
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.'),
         duration: const Duration(milliseconds: 1200),), // 1.2초 지속시간 설정
       );
-      // ★★★ (충돌 마커 및 HEAD 버전 제거) ★★★
       Navigator.of(context).push(  // 장바구니 페이지로 이동
         MaterialPageRoute(builder: (_) => const CartPage()),
       );
@@ -125,6 +123,7 @@ class ProductDetailPage extends StatelessWidget {  // StatelessWidget 사용
   }
 }
 
+// ★★★ 첫 번째 _DetailTile 정의 (유지) ★★★
 class _DetailTile extends StatelessWidget {  // 상품 상세 정보 타일 위젯
   const _DetailTile({required this.label, required this.value});
 
@@ -157,7 +156,7 @@ class _DetailTile extends StatelessWidget {  // 상품 상세 정보 타일 위�
   }
 }
 
-// ★★★ 이미지 로더 위젯 (변경 없음) ★★★
+// ★★★ 첫 번째 _ProductDetailImage 정의 (유지) ★★★
 class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
   const _ProductDetailImage({
     required this.imageUrl,
@@ -206,121 +205,6 @@ class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
         },
       );
     } else if (imageUrl.startsWith('assets/')) {
-      // 2. 앱 내부 에셋 이미지
-      return Image.asset(
-        imageUrl,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) { // 에러 처리 위젯
-          return _buildErrorWidget();  // 에러 시 대체 위젯 반환
-        },
-      );
-    } else {
-      // 3. 기기 갤러리에서 가져온 로컬 파일 이미지
-      final file = File(imageUrl);
-      // (경로가 비어있지 않은지 확인)
-      if (imageUrl.isNotEmpty && file.existsSync()) {
-        return Image.file(
-          file,
-          width: width,
-          height: height,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildErrorWidget();
-          },
-        );
-      } else {
-        // 4. 경로가 잘못되었거나 파일이 없는 경우
-        return _buildErrorWidget();
-      }
-    }
-  }
-}
-
-}
-
-class _DetailTile extends StatelessWidget {  // 상품 상세 정보 타일 위젯
-  const _DetailTile({required this.label, required this.value});  
-
-  final String label;  // 타일 라벨
-  final String value;  // 타일 값
-
-  @override
-  Widget build(BuildContext context) {  
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.titleMedium,
-          ),
-          Text(
-            value,
-            style: theme.textTheme.titleLarge,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 ★★★
-class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
-  const _ProductDetailImage({  
-    required this.imageUrl,
-    this.width = double.infinity,
-    this.height = 240.0,
-  });
-
-  final String imageUrl;  // 이미지 경로 (URL, 로컬 파일 경로, 앱 에셋 경로)
-  final double width;
-  final double height;
-
-  // 공통 에러 위젯
-  Widget _buildErrorWidget() { // 에러 시 표시할 위젯
-    return Container(
-      width: width,
-      height: height,
-      color: Colors.grey[200], // 배경색
-      child: Icon(
-        Icons.broken_image_outlined, // 깨진 이미지 아이콘
-        color: Colors.grey[400], // 아이콘 색상
-        size: 60,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {  
-    if (imageUrl.startsWith('http')) {  
-      // 1. 인터넷 URL 이미지
-      return Image.network(  // 네트워크 이미지 로드
-        imageUrl,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) {  // 로딩 중 위젯
-          if (progress == null) return child;  // 로딩 완료 시 이미지 반환
-          return Container(
-            width: width,
-            height: height,
-            color: Colors.grey[200],
-            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),  // 로딩 인디케이터
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {  // 에러 처리 위젯
-          return _buildErrorWidget();  // 에러 시 대체 위젯 반환
-        },
-      );
-    } else if (imageUrl.startsWith('assets/')) {  
       // 2. 앱 내부 에셋 이미지
       return Image.asset(
         imageUrl,
