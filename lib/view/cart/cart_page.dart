@@ -62,16 +62,32 @@ class CartPage extends StatelessWidget {
                             title: const Text('결제를 하시겠습니까?'),
                             content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
                             actions: [
-                              TextButton(
+                              // ★★★ 충돌 해결: ttotoy_jiwon 브랜치 코드 선택 ★★★
+                              // 1. 취소 버튼 (ElevatedButton)
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(80, 40), // 버튼 크기 지정
+                                  backgroundColor:
+                                      Colors.grey.shade200, // 취소 버튼은 배경색을 다르게
+                                  foregroundColor: Colors.black87,
+                                ),
                                 onPressed: () => Navigator.pop(context),
                                 child: const Text('취소'),
                               ),
+
+                              // 2. 확인 버튼 (ElevatedButton)
                               ElevatedButton(
-                                  onPressed: () {
-                                    cartStore.clear();
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('확인')),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(80, 40), // 버튼 크기 지정
+                                  // 확인 버튼은 Primary 색상 (테마 색상)을 유지합니다.
+                                ),
+                                onPressed: () {
+                                  cartStore.clear();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('확인'),
+                              ),
+                              // ★★★ (충돌 마커 및 main 브랜치 코드 제거) ★★★
                             ],
                           );
                         });
@@ -130,13 +146,11 @@ class _CartItemCard extends StatelessWidget {
           const SizedBox(width: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            // ★★★ 이미지 로더 위젯으로 변경 ★★★
             child: _CartProductImage(
               imageUrl: cartItem.product.imageAsset,
               width: 70,
               height: 70,
             ),
-            // ★★★ (기존 Image.asset() 삭제) ★★★
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -258,7 +272,7 @@ class _CartSummary extends StatelessWidget {
   }
 }
 
-// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 (신규 추가) ★★★
+// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 (변경 없음) ★★★
 class _CartProductImage extends StatelessWidget {
   const _CartProductImage({
     required this.imageUrl,
