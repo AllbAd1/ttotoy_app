@@ -233,7 +233,7 @@ class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
         );
       } else {
         // 4. 경로가 잘못되었거나 파일이 없는 경우
-        return _buildErrorWidget();
+        return _buildErrorWidget(); // 에러 시 대체 위젯 반환
       }
     }
   }
