@@ -1,12 +1,14 @@
 import 'dart:io'; // ★★★ 파일 이미지를 위해 import 추가 ★★★
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // ★★★ 마침표(.)를 콜론(:)으로 수정 ★★★
 
 import '../../constants/colors.dart';
 import '../../state/cart_store.dart';
-//import '../../core/product.dart' hide CartItem; // CartItem 이름이 중복으로 사용되기 때문에 숨겨서 가져오는것으로 적용
+import '../../core/product.dart' hide CartItem; // ★★★ 'Product' 클래스를 가져오기 위해 주석 해제 ★★★
 import '../../state/product_store.dart'; // ★★★ ProductStore import 추가 ★★★
+import '../ttotoy_detail/ttotoy_detail_page.dart'; // ★★★ 상세 페이지 import 추가 ★★★
 
-import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
+import 'package:intl/intl.dart'; // ★★★ 마침표(.)를 콜론(:)으로 수정 ★★★
+
 
 class CartPage extends StatelessWidget { //cart page 클래스 시작
   const CartPage({super.key}); //cart page 생성자
@@ -49,7 +51,11 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
                     separatorBuilder: (_, __) => const SizedBox(height: 12),  // 아이템 사이 간격 설정
                     itemBuilder: (context, index) {  // 아이템 빌더
                       final cartItem = items[index];
-                      return _CartItemCard(cartItem: cartItem);  // _CartItemCard 위젯 반환
+                      // ★★★ _CartItemCard에 onTap 콜백 전달 ★★★
+                      return _CartItemCard(
+                        cartItem: cartItem,
+                        onTap: () => _openDetail(context, cartItem.product),
+                      );
                     },
                   ),
                 ),
@@ -121,13 +127,27 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
       ),
     );
   }
+
+  // ★★★ 상세 페이지 이동 함수 추가 ★★★
+  void _openDetail(BuildContext context, Product product) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProductDetailPage(product: product),
+      ),
+    );
+  }
 }
 
 class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
 
-  const _CartItemCard({required this.cartItem}); // 여기서 사용하는 CartItem도  cart_store.dart에서 가져옴
+  // ★★★ onTap 콜백 추가 ★★★
+  const _CartItemCard({
+    required this.cartItem,
+    required this.onTap,
+  }); // 여기서 사용하는 CartItem도  cart_store.dart에서 가져옴
 
   final CartItem cartItem; // CartItem 속성
+  final VoidCallback onTap; // ★★★ 탭 콜백 변수 ★★★
 
   @override
   Widget build(BuildContext context) {
@@ -139,74 +159,79 @@ class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
       decimalDigits: 0, //    소수점 자리수 없음
     );
 
-    return Container(
-      decoration: BoxDecoration(  // 카드 스타일 설정
-        color: theme.colorScheme.surface,  // 카드 배경색
-        borderRadius: BorderRadius.circular(16),  // 모서리 둥글게
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),  // 그림자 색상
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(12), // 카드 내부 여백
-      child: Row(  // 가로 레이아웃
-        children: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline), // 삭제 아이콘
-            color: AppColors.descriptionGray, // 아이콘 색상
+    // ★★★ InkWell로 감싸서 탭 가능하도록 수정 ★★★
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(  // 카드 스타일 설정
+          color: theme.colorScheme.surface,  // 카드 배경색
+          borderRadius: BorderRadius.circular(16),  // 모서리 둥글게
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),  // 그림자 색상
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(12), // 카드 내부 여백
+        child: Row(  // 가로 레이아웃
+          children: [
+            IconButton(
+              icon: const Icon(Icons.delete_outline), // 삭제 아이콘
+              color: AppColors.descriptionGray, // 아이콘 색상
 
-            onPressed: () => cartStore.removeProduct(cartItem.product),// 여기서 사용하는 product는 core/product.dart의 Product를 가져옴.
-            padding: EdgeInsets.zero, // 아이콘 버튼 패딩 제거
-            constraints: const BoxConstraints(), // 아이콘 버튼 크기 제약 제거
-          ),
-          const SizedBox(width: 8),  // 아이콘과 이미지 사이 간격
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12), // 이미지 모서리 둥글게
-            child: _CartProductImage(  // 커스텀 이미지 위젯
-              imageUrl: cartItem.product.imageAsset,  // 이미지 URL
-              width: 70,
-              height: 70,
+              onPressed: () => cartStore.removeProduct(cartItem.product),// 여기서 사용하는 product는 core/product.dart의 Product를 가져옴.
+              padding: EdgeInsets.zero, // 아이콘 버튼 패딩 제거
+              constraints: const BoxConstraints(), // 아이콘 버튼 크기 제약 제거
             ),
-          ),
-          const SizedBox(width: 12), // 이미지와 텍스트 사이 간격
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
-              children: [
-                Text(
-                  cartItem.product.name, // 상품 이름
-                  style: theme.textTheme.titleLarge, // 제목 스타일
-                ),
-                const SizedBox(height: 4), // 이름과 가격 사이 간격
-                Text(
-                  currencyFormat.format(cartItem.product.price), // 금액 포맷팅 적용
-                  //'₩${cartItem.product.price.toStringAsFixed(0)}', // 기존 금액 표시 방식 주석으로 변경
-                  style: theme.textTheme.titleLarge?.copyWith( // 가격 스타일
-                    color: AppColors.primaryPeach, // 주요 색상 적용
+            const SizedBox(width: 8),  // 아이콘과 이미지 사이 간격
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12), // 이미지 모서리 둥글게
+              child: _CartProductImage(  // 커스텀 이미지 위젯
+                imageUrl: cartItem.product.imageAsset,  // 이미지 URL
+                width: 70,
+                height: 70,
+              ),
+            ),
+            const SizedBox(width: 12), // 이미지와 텍스트 사이 간격
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+                children: [
+                  Text(
+                    cartItem.product.name, // 상품 이름
+                    style: theme.textTheme.titleLarge, // 제목 스타일
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4), // 이름과 가격 사이 간격
+                  Text(
+                    currencyFormat.format(cartItem.product.price), // 금액 포맷팅 적용
+                    //'₩${cartItem.product.price.toStringAsFixed(0)}', // 기존 금액 표시 방식 주석으로 변경
+                    style: theme.textTheme.titleLarge?.copyWith( // 가격 스타일
+                      color: AppColors.primaryPeach, // 주요 색상 적용
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12), // 텍스트와 수량 조절기 사이 간격
-          _QuantityControl( // 수량 조절기 위젯
-            quantity: cartItem.quantity, // 현재 수량
-            inventory: cartItem.product.inventory,  // 재고 수량
-            onChanged: (delta) { // 수량 변경 콜백
-              final success =  // 변경 성공 여부
-                  cartStore.changeQuantity(cartItem.product, delta);  // 수량 변경 시도
-              if (!success && delta > 0) { // 증가 시에만 재고 부족 메시지 표시
-                ScaffoldMessenger.of(context).showSnackBar( // 스낵바 표시
-                  const SnackBar(content: Text('재고 수량을 초과할 수 없어요.'),
-                  duration: Duration(milliseconds: 1200),),
-                );
-              }
-            },
-          ),
-        ],
+            const SizedBox(width: 12), // 텍스트와 수량 조절기 사이 간격
+            _QuantityControl( // 수량 조절기 위젯
+              quantity: cartItem.quantity, // 현재 수량
+              inventory: cartItem.product.inventory,  // 재고 수량
+              onChanged: (delta) { // 수량 변경 콜백
+                final success =  // 변경 성공 여부
+                    cartStore.changeQuantity(cartItem.product, delta);  // 수량 변경 시도
+                if (!success && delta > 0) { // 증가 시에만 재고 부족 메시지 표시
+                  ScaffoldMessenger.of(context).showSnackBar( // 스낵바 표시
+                    const SnackBar(content: Text('재고 수량을 초과할 수 없어요.'),
+                    duration: Duration(milliseconds: 1200),),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -300,6 +325,7 @@ class _CartSummary extends StatelessWidget {  // 장바구니 합계 위젯
   }
 }
 
+// ★★★ 이미지 로더 위젯 수정 (BoxFit.contain 적용) ★★★
 class _CartProductImage extends StatelessWidget {  // 장바구니 상품 이미지 위젯
   const _CartProductImage({
     required this.imageUrl,  // 이미지 URL
@@ -331,7 +357,7 @@ class _CartProductImage extends StatelessWidget {  // 장바구니 상품 이미
         imageUrl,
         width: width,
         height: height,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain, // ★★★ .cover에서 .contain으로 변경 ★★★
         loadingBuilder: (context, child, progress) { // 로딩 빌더
           if (progress == null) return child;  // 로딩 완료 시 이미지 반환
           return Container(
@@ -350,7 +376,7 @@ class _CartProductImage extends StatelessWidget {  // 장바구니 상품 이미
         imageUrl,
         width: width,
         height: height,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain, // ★★★ .cover에서 .contain으로 변경 ★★★
         errorBuilder: (context, error, stackTrace) {  // 에러 빌더
           return _buildErrorWidget();  // 에러 위젯 반환
         },
@@ -362,7 +388,7 @@ class _CartProductImage extends StatelessWidget {  // 장바구니 상품 이미
           file,
           width: width,
           height: height,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain, // ★★★ .cover에서 .contain으로 변경 ★★★
           errorBuilder: (context, error, stackTrace) {
             return _buildErrorWidget(); // 에러 위젯 반환
           },
