@@ -1,11 +1,11 @@
 import 'dart:io'; // 파일 이미지를 위해 import 추가
-import 'package:flutter/material.dart'; // ★★★ 오타 수정 (package. -> package:) ★★★
-import 'package:intl/intl.dart'; // ★★★ 오타 수정 (package. -> package:) ★★★
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // 원화 포맷을 위해 import 추가
 
 import '../../constants/colors.dart'; // AppColors import
 import '../../core/product.dart';  // Product 모델 import
 import '../../state/cart_store.dart';  // CartStore import
-import '../cart/cart_page.dart';  // CartPage import
+// import '../cart/cart_page.dart';  // CartPage import
 
 // 원화 포맷 함수 정의
 String formatCurrency(double price) {
@@ -153,7 +153,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => _addToCartAndGo(context),  // 장바구니 추가 및 이동 함수 호출
+              // ★★★ 함수 이름 변경: _addToCartAndGo -> _addToCart ★★★
+              onPressed: () => _addToCart(context),  // 장바구니 추가 함수 호출
               style: ElevatedButton.styleFrom(  // 버튼 스타일 설정
                 minimumSize: const Size(double.infinity, 56), // 버튼 가로 전체 너비, 높이 56
               ),
@@ -165,27 +166,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  // ★★★ 장바구니 추가 함수 (StatefulWidget에 맞게 수정) ★★★
-  void _addToCartAndGo(BuildContext context) {
+  // ★★★ 함수 이름 변경 및 Navigator.push 제거 ★★★
+  void _addToCart(BuildContext context) {
     final cartStore = CartProvider.of(context);
-    // ★★★ widget.product로 접근 ★★★
-    final added = cartStore.addProduct(widget.product);
+    final added = cartStore.addProduct(widget.product); // widget.product로 접근
     if (added) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${widget.product.name}이(가) 장바구니에 담겼어요.'),
-        duration: const Duration(milliseconds: 1200),),
+        duration: const Duration(milliseconds: 1200),), // 1.2초 지속시간 설정
       );
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const CartPage()),
-      );
+      // ★★★ 페이지 이동(Navigator.push) 코드 제거 ★★★
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(  // 실패 메시지
         const SnackBar(content: Text('재고 수량을 초과하여 담을 수 없어요.')),
       );
     }
   }
+  // ★★★ (수정 완료) ★★★
 
-  // ★★★ 이미지 확대 다이얼로그 함수 (신규 추가) ★★★
+  // ★★★ 이미지 확대 다이얼로그 함수 (기존과 동일) ★★★
   void _showImageDialog(BuildContext context, String imageUrl) {
     showDialog(
       context: context,
@@ -215,8 +214,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   icon: const Icon(Icons.close, color: Colors.white, size: 30),
                   onPressed: () => Navigator.of(context).pop(),
                   style: IconButton.styleFrom(
-                    // ★★★ withOpacity -> withAlpha로 수정 ★★★
-                    backgroundColor: Colors.black.withAlpha(128), // (0.5 * 255 = 128)
+                    backgroundColor: Colors.black.withAlpha(128), // withOpacity 대체
                   ),
                 ),
               ),
@@ -259,19 +257,19 @@ class _DetailTile extends StatelessWidget {
   }
 }
 
-// ★★★ _ProductDetailImage 클래스 (fit 속성을 매개변수로 받도록 수정) ★★★
+// _ProductDetailImage 클래스 (기존과 동일)
 class _ProductDetailImage extends StatelessWidget {
   const _ProductDetailImage({
     required this.imageUrl,
     this.width = double.infinity,
     this.height = 240.0,
-    this.fit = BoxFit.contain, // ★★★ fit 기본값을 contain으로 변경 ★★★
+    this.fit = BoxFit.contain,
   });
 
   final String imageUrl;
   final double width;
   final double height;
-  final BoxFit fit; // ★★★ fit 속성 추가 ★★★
+  final BoxFit fit;
 
   // 공통 에러 위젯
   Widget _buildErrorWidget() {
@@ -295,7 +293,7 @@ class _ProductDetailImage extends StatelessWidget {
         imageUrl,
         width: width,
         height: height,
-        fit: fit, // ★★★ 매개변수로 받은 fit 사용 ★★★
+        fit: fit,
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;
           return Container(
@@ -315,7 +313,7 @@ class _ProductDetailImage extends StatelessWidget {
         imageUrl,
         width: width,
         height: height,
-        fit: fit, // ★★★ 매개변수로 받은 fit 사용 ★★★
+        fit: fit,
         errorBuilder: (context, error, stackTrace) {
           return _buildErrorWidget();
         },
@@ -328,7 +326,7 @@ class _ProductDetailImage extends StatelessWidget {
           file,
           width: width,
           height: height,
-          fit: fit, // ★★★ 매개변수로 받은 fit 사용 ★★★
+          fit: fit,
           errorBuilder: (context, error, stackTrace) {
             return _buildErrorWidget();
           },
