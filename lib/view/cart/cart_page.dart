@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 import '../../state/cart_store.dart';
-import '../../core/product.dart' hide CartItem;  // CartItem 이름이 중복으로 사용되기 때문에 숨겨서 가져오는것으로 적용
-// (기존 import '../../core/product.dart'; 삭제) 
+import '../../core/product.dart' hide CartItem; // CartItem 이름이 중복으로 사용되기 때문에 숨겨서 가져오는것으로 적용
+import '../../state/product_store.dart'; // ★★★ ProductStore import 추가 ★★★
 
 import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
 
 class CartPage extends StatelessWidget { //cart page 클래스 시작
   const CartPage({super.key}); //cart page 생성자
 
-  @override 
-  Widget build(BuildContext context) {  
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context); // 테마 가져오기
     final cartStore = CartProvider.of(context); // cart store 가져오기
+    // ★★★ ProductStore 인스턴스 가져오기 (결제 시 사용) ★★★
+    final productStore = ProductProvider.of(context);
 
     return Scaffold( // Scaffold 위젯 반환
       backgroundColor: theme.scaffoldBackgroundColor, // 배경색 설정
@@ -29,8 +31,7 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
       ),
       body: AnimatedBuilder(  // 애니메이션 빌더 사용
         animation: cartStore,  // cartStore를 애니메이션으로 사용
-        builder: (context, _) {  
-          
+        builder: (context, _) {
           final items = cartStore.items;//  여기서 사용하는 items와 CartItem은 cart_store.dart에서 가져옴
           if (items.isEmpty) {  // 장바구니가 비어있는 경우
             return const Center(  // 중앙에 텍스트 표시
@@ -38,16 +39,16 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
             );
           }
           final totalPrice = cartStore.totalPrice;  // 총 가격 계산
-          return Padding( 
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),  
-            child: Column(  
-              children: [  
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              children: [
                 Expanded(  // 남은 공간을 모두 차지
                   child: ListView.separated(  // 구분자가 있는 리스트뷰
                     itemCount: items.length,  //  아이템 개수 설정
                     separatorBuilder: (_, __) => const SizedBox(height: 12),  // 아이템 사이 간격 설정
                     itemBuilder: (context, index) {  // 아이템 빌더
-                      final cartItem = items[index];  
+                      final cartItem = items[index];
                       return _CartItemCard(cartItem: cartItem);  // _CartItemCard 위젯 반환
                     },
                   ),
@@ -58,9 +59,9 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
                 ElevatedButton(  // 결제 버튼
                   onPressed: () {  // 버튼 눌렀을 때
                     showDialog(  // 다이얼로그 표시
-                        context: context,  
+                        context: context,
                         barrierDismissible: true,  // 바깥쪽 터치로 닫기 가능
-                        builder: (BuildContext context) {  
+                        builder: (BuildContext context) {
                           return AlertDialog(  // 알림 대화상자
                             title: const Text('결제를 하시겠습니까?'),
                             content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
@@ -68,7 +69,7 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
                               ElevatedButton(  // 취소 버튼
                                 style: ElevatedButton.styleFrom(  // 버튼 스타일 설정
                                   minimumSize: const Size(80, 40), // 버튼 크기 지정
-                                  backgroundColor:  
+                                  backgroundColor:
                                       Colors.grey.shade200, // 취소 버튼은 배경색을 다르게
                                   foregroundColor: Colors.black87, // 취소 버튼 텍스트 색상
                                 ),
@@ -79,11 +80,29 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
                                 style: ElevatedButton.styleFrom(  // 버튼 스타일 설정
                                   minimumSize: const Size(80, 40), // 버튼 크기 지정
                                 ),
-                                onPressed: () {  // 확인 버튼 눌렀을 때
-                                  cartStore.clear();  //  장바구니 비우기
-                                  Navigator.pop(context);  // 다이얼로그 닫기
+                                // ★★★ 확인 버튼 로직 수정 (재고 차감) ★★★
+                                onPressed: () {
+                                  // 1. 장바구니 비우기 전에 상품 목록 가져오기
+                                  final purchasedItems = List<CartItem>.from(cartStore.items);
+
+                                  // 2. ProductStore의 재고 차감
+                                  for (var item in purchasedItems) {
+                                    productStore.updateInventory(item.product, -item.quantity);
+                                  }
+
+                                  // 3. 장바구니 비우기
+                                  cartStore.clear();
+
+                                  // 4. 다이얼로그 닫기
+                                  Navigator.pop(context);
+
+                                  // 5. (선택적) 결제 완료 메시지
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('결제가 완료되었습니다.')),
+                                  );
                                 },
-                                child: const Text('확인'),  
+                                // ★★★ (수정 완료) ★★★
+                                child: const Text('확인'),
                               ),
                             ],
                           );
@@ -104,13 +123,13 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
 }
 
 class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
- 
+
   const _CartItemCard({required this.cartItem}); // 여기서 사용하는 CartItem도  cart_store.dart에서 가져옴
 
   final CartItem cartItem; // CartItem 속성
 
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cartStore = CartProvider.of(context); // cart store 가져오기
     final currencyFormat = NumberFormat.currency(  //   금액 포맷터 설정
@@ -119,7 +138,7 @@ class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
       decimalDigits: 0, //    소수점 자리수 없음
     );
 
-    return Container(  
+    return Container(
       decoration: BoxDecoration(  // 카드 스타일 설정
         color: theme.colorScheme.surface,  // 카드 배경색
         borderRadius: BorderRadius.circular(16),  // 모서리 둥글게
@@ -137,7 +156,7 @@ class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
           IconButton(
             icon: const Icon(Icons.delete_outline), // 삭제 아이콘
             color: AppColors.descriptionGray, // 아이콘 색상
-            
+
             onPressed: () => cartStore.removeProduct(cartItem.product),// 여기서 사용하는 product는 core/product.dart의 Product를 가져옴.
             padding: EdgeInsets.zero, // 아이콘 버튼 패딩 제거
             constraints: const BoxConstraints(), // 아이콘 버튼 크기 제약 제거
@@ -173,7 +192,7 @@ class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
           ),
           const SizedBox(width: 12), // 텍스트와 수량 조절기 사이 간격
           _QuantityControl( // 수량 조절기 위젯
-            quantity: cartItem.quantity,  // 현재 수량
+            quantity: cartItem.quantity, // 현재 수량
             inventory: cartItem.product.inventory,  // 재고 수량
             onChanged: (delta) { // 수량 변경 콜백
               final success =  // 변경 성공 여부
@@ -192,7 +211,7 @@ class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
 }
 
 class _QuantityControl extends StatelessWidget { // 수량 조절기 위젯
-  const _QuantityControl({  
+  const _QuantityControl({
     required this.quantity, // 현재 수량
     required this.inventory,  // 재고 수량
     required this.onChanged  // 수량 변경 콜백
@@ -203,7 +222,7 @@ class _QuantityControl extends StatelessWidget { // 수량 조절기 위젯
   final ValueChanged<int> onChanged;  // 수량 변경 콜백
 
   @override
-  Widget build(BuildContext context) {   
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bool canDecrease = quantity > 1;  // 감소 가능 여부
     final bool canIncrease = quantity < inventory;  // 증가 가능 여부
@@ -244,7 +263,7 @@ class _CartSummary extends StatelessWidget {  // 장바구니 합계 위젯
   final double total;  // 총 금액 속성
 
   @override
-  Widget build(BuildContext context) {  
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currencyFormat = NumberFormat.currency(  //   금액 포맷터 설정
       locale: 'ko_KR',  //    한국 로케일 (쉼표 그룹핑)
@@ -280,13 +299,13 @@ class _CartSummary extends StatelessWidget {  // 장바구니 합계 위젯
 }
 
 class _CartProductImage extends StatelessWidget {  // 장바구니 상품 이미지 위젯
-  const _CartProductImage({  
+  const _CartProductImage({
     required this.imageUrl,  // 이미지 URL
-    this.width = 70.0,  
+    this.width = 70.0,
     this.height = 70.0,
   });
 
-  final String imageUrl;  
+  final String imageUrl;
   final double width;  // 이미지 너비
   final double height; // 이미지 높이
 
@@ -304,7 +323,7 @@ class _CartProductImage extends StatelessWidget {  // 장바구니 상품 이미
   }
 
   @override
-  Widget build(BuildContext context) {  
+  Widget build(BuildContext context) {
     if (imageUrl.startsWith('http')) {  // URL 이미지 처리
       return Image.network(  // 네트워크 이미지
         imageUrl,
@@ -342,7 +361,7 @@ class _CartProductImage extends StatelessWidget {  // 장바구니 상품 이미
           width: width,
           height: height,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) { 
+          errorBuilder: (context, error, stackTrace) {
             return _buildErrorWidget(); // 에러 위젯 반환
           },
         );
