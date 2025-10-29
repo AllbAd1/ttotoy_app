@@ -384,7 +384,7 @@ class _PhotoPlaceholder extends StatelessWidget {
       content = Image.network(
         imageUrl!,
         width: double.infinity,
-        height: 180,
+        height: 220, //   이미지 입력칸 높이 수정
         // ★★★ BoxFit.contain으로 변경하여 이미지 전체가 보이도록 함 ★★★
         fit: BoxFit.contain,
         loadingBuilder: (context, child, loadingProgress) {
@@ -418,7 +418,7 @@ class _PhotoPlaceholder extends StatelessWidget {
       content = Image.file(
         imageFile!,
         width: double.infinity,
-        height: 180,
+        height: 220, //   이미지 입력칸 높이 수정
         // ★★★ BoxFit.contain으로 변경하여 이미지 전체가 보이도록 함 ★★★
         fit: BoxFit.contain,
       );
@@ -447,7 +447,7 @@ class _PhotoPlaceholder extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 180,
+        height: 220, //   이미지 입력칸 높이 수정
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.grey.shade100, // 배경색 약간 추가
