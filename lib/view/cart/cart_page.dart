@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 import '../../state/cart_store.dart';
-import '../../core/product.dart' hide CartItem; // CartItem 이름이 중복으로 사용되기 때문에 숨겨서 가져오는것으로 적용
+//import '../../core/product.dart' hide CartItem; // CartItem 이름이 중복으로 사용되기 때문에 숨겨서 가져오는것으로 적용
 import '../../state/product_store.dart'; // ★★★ ProductStore import 추가 ★★★
 
 import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
