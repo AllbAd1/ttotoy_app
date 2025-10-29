@@ -1,6 +1,6 @@
-import 'dart:io'; // ★★★ 파일 이미지를 위해 import 추가 ★★★
+import 'dart:io'; // 파일 이미지를 위해 import 추가
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // ★★★ 원화 포맷을 위해 import 추가 ★★★
+import 'package:intl/intl.dart'; // 원화 포맷을 위해 import 추가
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
@@ -10,13 +10,12 @@ import '../cart/cart_page.dart';
 import '../product/add_product_page.dart';
 import '../ttotoy_detail/ttotoy_detail_page.dart';
 
-// ★★★ 원화 포맷 함수 정의 ★★★
+// 원화 포맷 함수 정의
 String formatCurrency(double price) {
   final format =
       NumberFormat.currency(locale: 'ko_KR', symbol: '₩', decimalDigits: 0);
   return format.format(price.round());
 }
-// ★★★
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -37,25 +36,14 @@ class HomePage extends StatelessWidget {
           'TtoToy',
           style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
-        /*
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
-            color: AppColors.descriptionGray,
-            onPressed: () => _openCart(context),
-          ),
-        ],
-        */
+        /* actions 생략 */
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /* 검색바 삭제 (주석처리)
-            _SearchBar(theme: theme),
-            const SizedBox(height: 20),
-            */
+            /* 검색바 삭제 (주석처리) */
             Expanded(
               child: AnimatedBuilder(
                 // ★★★ ProductProvider.of(context)를 직접 animation으로 전달하여 구독 ★★★
@@ -153,13 +141,13 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // ★★★ _addToCart 함수에서 불필요한 주석 및 임시 코드 제거 완료 ★★★
+  // ★★★ _addToCart 함수 (재고 로직은 CartStore가 담당) ★★★
   void _addToCart(
     BuildContext context,
     CartStore cartStore,
     Product product,
   ) {
-    final added = cartStore.addProduct(product); // CartStore가 ProductStore 재고 업데이트 처리
+    final added = cartStore.addProduct(product); // CartStore가 ProductStore 재고 "확인"
     final messenger = ScaffoldMessenger.of(context);
     const quickDuration = Duration(milliseconds: 1200);
 
@@ -177,7 +165,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// _ProductCard 클래스 
+// ★★★ _ProductCard 클래스 수정 ★★★
 class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
@@ -213,7 +201,10 @@ class _ProductCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12), // 이미지 모서리 둥글게
               child: _ProductImage(
-                imageUrl: product.imageAsset,
+                // ★★★ imageAsset -> imageAssets.first로 수정 ★★★
+                imageUrl: product.imageAssets.isNotEmpty
+                    ? product.imageAssets.first
+                    : '', // 이미지가 없는 경우 에러 위젯 표시
                 width: 70,
                 height: 70,
               ),
@@ -268,7 +259,8 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// ★★★ 이미지 로더 위젯 수정 (BoxFit.contain 적용) ★★★
+
+// _ProductImage 위젯 (기존과 동일)
 class _ProductImage extends StatelessWidget {  // 이미지 로딩 위젯
   const _ProductImage({
     required this.imageUrl,
@@ -300,7 +292,7 @@ class _ProductImage extends StatelessWidget {  // 이미지 로딩 위젯
         imageUrl,
         width: width,
         height: height,
-        fit: BoxFit.contain, // ★★★ .cover에서 .contain으로 변경 ★★★
+        fit: BoxFit.contain, // 이미지 잘림 방지
         loadingBuilder: (context, child, progress) { // 로딩 중 위젯
           if (progress == null) return child;
           return Container(
@@ -319,7 +311,7 @@ class _ProductImage extends StatelessWidget {  // 이미지 로딩 위젯
         imageUrl,
         width: width,
         height: height,
-        fit: BoxFit.contain, // ★★★ .cover에서 .contain으로 변경 ★★★
+        fit: BoxFit.contain, // 이미지 잘림 방지
         errorBuilder: (context, error, stackTrace) { // 에러 처리 위젯
           return _buildErrorWidget();
         },
@@ -331,7 +323,7 @@ class _ProductImage extends StatelessWidget {  // 이미지 로딩 위젯
           file,
           width: width,
           height: height,
-          fit: BoxFit.contain, // ★★★ .cover에서 .contain으로 변경 ★★★
+          fit: BoxFit.contain, // 이미지 잘림 방지
           errorBuilder: (context, error, stackTrace) {  // 에러 처리 위젯
             return _buildErrorWidget(); // 파일 로드 에러 시 대체 위젯 반환
           },
@@ -342,4 +334,3 @@ class _ProductImage extends StatelessWidget {  // 이미지 로딩 위젯
     }
   }
 }
-

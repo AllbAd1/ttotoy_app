@@ -6,8 +6,8 @@ import '../../constants/colors.dart';
 import '../../core/product.dart';
 import '../../state/product_store.dart';
 
-import 'package:flutter/services.dart'; //    TextInputFormatter를 위해 추가
-import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
+import 'package:flutter/services.dart'; // ★★★ 오타 수정 (package. -> package:) ★★★
+import 'package:intl/intl.dart'; // ★★★ 오타 수정 (package. -> package:) ★★★
 
 
 // 가격 입력 필드 포맷터 (쉼표 추가)
@@ -50,24 +50,27 @@ class AddProductPage extends StatefulWidget {
 }
 
 class _AddProductPageState extends State<AddProductPage> {
-  // 이미지 파일 상태 관리를 위한 변수
-  File? _selectedFile; // 갤러리에서 선택한 파일
-  String? _selectedUrl; // URL로 입력받은 이미지 주소
+  // ★★★ 이미지 리스트 (기존과 동일) ★★★
+  final List<dynamic> _images = []; // File 또는 String(URL)을 담는 리스트
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
+  //final _categoryController = TextEditingController();    카테고리 입력칸 삭제
   final _inventoryController = TextEditingController();
   final _sizeController = TextEditingController();
+  //final _colorController = TextEditingController();   컬러 입력칸 삭제
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    //_categoryController.dispose();    카테고리 입력칸 삭제
     _inventoryController.dispose();
     _sizeController.dispose();
+    //_colorController.dispose();   컬러 입력칸 삭제
     super.dispose();
   }
 
@@ -77,7 +80,7 @@ class _AddProductPageState extends State<AddProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Product', style: TextStyle(fontSize: 20)),
-        /*  앱바 옆 저장버튼 비활성화
+        /* 앱바 옆 저장버튼 비활성화
         actions: [
           TextButton(
             onPressed: _onSave,
@@ -96,57 +99,57 @@ class _AddProductPageState extends State<AddProductPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 이미지 선택 영역
-              _PhotoPlaceholder(
-                onTap: _onPickPhoto, // 선택 UI 띄우기
-                imageFile: _selectedFile,
-                imageUrl: _selectedUrl,
+              // ★★★ 이미지 선택 UI (_PhotoGrid 위젯) ★★★
+              _PhotoGrid(
+                images: _images,
+                onAdd: _onPickPhoto,
+                onRemove: (index) {
+                  setState(() {
+                    _images.removeAt(index);
+                  });
+                },
               ),
               const SizedBox(height: 24),
-              // 상품 이름
+              // (이하 폼 필드는 동일)
               _buildTextField(
                 controller: _titleController,
                 label: '이름',
                 hint: '이름을 입력 해주세요!',
               ),
               const SizedBox(height: 16),
-              // 상품 설명
               _buildTextField(
                 controller: _descriptionController,
                 label: '설명',
                 hint: '설명을 입력 해주세요!',
-                maxLines: 6, // 입력칸 늘림
+                maxLines: 6, //   입력칸 늘림
               ),
               const SizedBox(height: 16),
-              // 가격
               _buildTextField(
                  controller: _priceController,
                  label: '가격',
-                 hint: '20,000',
+                 hint: '20,000', //    힌트 텍스트 변경 ₩ >> ₩20,000 >> 20,000
                  keyboardType: TextInputType.number,
                  inputFormatters: [
                    _PriceFormatter(), // 쉼표 포맷터 적용
-                   LengthLimitingTextInputFormatter(11), // 자리수 제한
+                   LengthLimitingTextInputFormatter(11), // 11자리 (9,999,999,999) 제한 (이제 정상 작동)
                  ],
                ),
               const SizedBox(height: 16),
-              // 재고 수량
               _buildTextField(
                 controller: _inventoryController,
-                label: '재고수량',
+                label: '재고수량', //   '재고 수량' >> '재고수량'으로 변경
                 hint: '숫자만 입력하세요',
                 keyboardType: TextInputType.number,
                  inputFormatters: [
-                   FilteringTextInputFormatter.digitsOnly, // 숫자만 입력 허용
+                   FilteringTextInputFormatter.digitsOnly, // 숫자만 입력 허용 (이제 정상 작동)
                    LengthLimitingTextInputFormatter(5), // 예: 최대 5자리
                  ]
               ),
               const SizedBox(height: 16),
-              // 사용 연령
               _buildTextField(
                  controller: _sizeController,
                  label: '사용연령',
-                 hint: '3~6개월',
+                 hint: '3~6개월', //    영어를 한글로 변경, '예시 0~3개월' >> '3~6개월' 변경
                ),
             ],
           ),
@@ -171,32 +174,32 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // 공통 텍스트 필드 빌더
+  // 공통 텍스트 필드 빌더 (기존과 동일)
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required String hint,
     TextInputType? keyboardType,
     int maxLines = 1,
-    List<TextInputFormatter>? inputFormatters, // 포맷터 추가
+    List<TextInputFormatter>? inputFormatters, //   추가된 매개변수
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      inputFormatters: inputFormatters,// inputFormatters 적용
+      inputFormatters: inputFormatters,//   inputFormaters 적용
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixText: (controller == _priceController) ? '₩' : null, // 가격 필드에 '₩' 추가
+        prefixText: (controller == _priceController) ? '₩' : null, //   가격입력 시, ₩자동설정
         hintStyle: TextStyle(
-          color: Colors.grey.shade400, // 힌트 텍스트 색상 연하게
-        ),
+        color: Colors.grey.shade400, //   힌트텍스트 컬러 변경 : 기존보다 더 연한 회색 (예: grey.shade400)
+      ),
         filled: true,
         fillColor: Colors.white,
         isDense: true,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // 패딩 조정
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12), //    설명 텍스트 위로 정렬
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -231,9 +234,15 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // 갤러리 또는 URL 선택 UI 띄우기
+  // 갤러리 또는 URL 선택 UI 띄우기 (기존과 동일)
   void _onPickPhoto() {
-    FocusScope.of(context).unfocus(); // 키보드 닫기
+    if (_images.length >= 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('사진은 최대 3개까지 추가할 수 있습니다.')),
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -244,7 +253,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 leading: const Icon(Icons.photo_library),
                 title: const Text('갤러리에서 선택'),
                 onTap: () {
-                  _getImage(ImageSource.gallery);
+                  _getImagesFromGallery(); // 여러 이미지 선택 함수 호출
                   Navigator.of(context).pop();
                 },
               ),
@@ -263,20 +272,31 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // 갤러리에서 이미지 가져오기
-  Future<void> _getImage(ImageSource source) async {
+  // 갤러리에서 "여러" 이미지 가져오기 로직 (기존과 동일)
+  Future<void> _getImagesFromGallery() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
+    // pickMultiImage 사용
+    final pickedFiles = await picker.pickMultiImage(
+      imageQuality: 80, // 이미지 품질 조절 (선택적)
+    );
 
-    if (pickedFile != null) {
+    if (pickedFiles.isNotEmpty) {
       setState(() {
-        _selectedFile = File(pickedFile.path);
-        _selectedUrl = null; // URL 선택 초기화
+        for (var file in pickedFiles) {
+          if (_images.length < 3) {
+            _images.add(File(file.path));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('사진은 최대 3개까지 추가할 수 있습니다.')),
+            );
+            break; // 3개 초과 시 반복 중단
+          }
+        }
       });
     }
   }
 
-  // URL 입력 다이얼로그
+  // URL 입력 다이얼로그 (기존과 동일)
   Future<void> _showUrlInputDialog() async {
     final urlController = TextEditingController();
     final result = await showDialog<String>(
@@ -310,23 +330,28 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
           ],
         );
-      },
+       },
     );
 
     if (result != null && result.isNotEmpty) {
       setState(() {
-        _selectedUrl = result;
-        _selectedFile = null; // 파일 선택 초기화
+        if (_images.length < 3) {
+          _images.add(result); // URL을 리스트에 추가
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('사진은 최대 3개까지 추가할 수 있습니다.')),
+          );
+        }
       });
     }
   }
 
-  // 저장 로직
+  // ★★★ 저장 로직 (imageAssets로 수정) ★★★
   void _onSave() {
     if (_formKey.currentState?.validate() != true) return;
-    if (_selectedFile == null && _selectedUrl == null) {
+    if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지를 선택해 주세요.')),
+        const SnackBar(content: Text('이미지를 1개 이상 선택해 주세요.')),
       );
       return;
     }
@@ -342,21 +367,24 @@ class _AddProductPageState extends State<AddProductPage> {
        return;
      }
 
-    final String imageAssetPath;
-    if (_selectedUrl != null && _selectedUrl!.isNotEmpty) {
-      imageAssetPath = _selectedUrl!;
-    } else {
-      imageAssetPath = _selectedFile!.path;
-    }
+    // _images 리스트를 String 리스트로 변환
+    final List<String> imagePaths = _images.map((image) {
+      if (image is File) {
+        return image.path;
+      }
+      return image as String;
+    }).toList();
+
 
     final product = Product(
       name: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: price,
-      imageAsset: imageAssetPath,
+      // ★★★ imageAsset -> imageAssets로 수정 (Product 모델과 일치) ★★★
+      imageAssets: imagePaths,
       inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
-          ? '0-3개월' // 기본값 설정
+          ? '0-3개월'
           : _sizeController.text.trim(),
     );
 
@@ -365,107 +393,126 @@ class _AddProductPageState extends State<AddProductPage> {
   }
 }
 
-// ★★★ _PhotoPlaceholder 위젯 수정 (BoxFit.contain 적용) ★★★
-class _PhotoPlaceholder extends StatelessWidget {
-  const _PhotoPlaceholder({
-    required this.onTap,
-    this.imageFile,
-    this.imageUrl, // URL을 받도록 추가
+// ( _PhotoGrid, _AddPhotoButton, _ImageThumbnail 위젯은 기존과 동일 )
+class _PhotoGrid extends StatelessWidget {
+  const _PhotoGrid({
+    required this.images,
+    required this.onAdd,
+    required this.onRemove,
   });
 
-  final VoidCallback onTap;
-  final File? imageFile;
-  final String? imageUrl; // URL 변수
+  final List<dynamic> images;
+  final VoidCallback onAdd;
+  final Function(int) onRemove;
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-
-    // 1. URL 이미지가 있으면 네트워크 이미지 표시
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
-      content = Image.network(
-        imageUrl!,
-        width: double.infinity,
-        height: 220, //   이미지 입력칸 높이 수정
-        // ★★★ BoxFit.contain으로 변경하여 이미지 전체가 보이도록 함 ★★★
-        fit: BoxFit.contain,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
-        },
-        errorBuilder: (context, error, stackTrace) {
-          // URL 로드 실패 시 에러 아이콘 표시
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: Colors.grey.shade400,
-                  size: 48,
-                ),
-                 const SizedBox(height: 8),
-                 Text(
-                   '이미지 로드 실패',
-                   style: TextStyle(color: Colors.grey.shade600),
-                 ),
-              ],
-            ),
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length + 1,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return _AddPhotoButton(onTap: onAdd);
+          }
+          final imageIndex = index - 1;
+          final image = images[imageIndex];
+          return _ImageThumbnail(
+            image: image,
+            onRemove: () => onRemove(imageIndex),
           );
         },
-      );
-    }
-    // 2. 갤러리 파일이 있으면 파일 이미지 표시
-    else if (imageFile != null) {
-      content = Image.file(
-        imageFile!,
-        width: double.infinity,
-        height: 220, //   이미지 입력칸 높이 수정
-        // ★★★ BoxFit.contain으로 변경하여 이미지 전체가 보이도록 함 ★★★
-        fit: BoxFit.contain,
-      );
-    }
-    // 3. 둘 다 없으면 기본 아이콘 표시
-    else {
-      content = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.add_photo_alternate_outlined,
-            color: Colors.grey.shade400,
-            size: 48,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Photo',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.descriptionGray,
-                ),
-          ),
-        ],
-      );
-    }
+      ),
+    );
+  }
+}
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 220, //   이미지 입력칸 높이 수정
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100, // 배경색 약간 추가
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.grey.shade300, // 테두리 색상 연하게
+class _AddPhotoButton extends StatelessWidget {
+  const _AddPhotoButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade300),
           ),
-        ),
-        // ClipRRect는 이미지 비율과 관계없이 둥근 모서리를 적용하기 위해 유지
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.0),
-          child: content,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add_a_photo_outlined, color: Colors.grey.shade600),
+              const SizedBox(height: 4),
+              Text(
+                '${context.findAncestorStateOfType<_AddProductPageState>()?._images.length ?? 0}/3',
+                style: TextStyle(color: Colors.grey.shade600),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+class _ImageThumbnail extends StatelessWidget {
+  const _ImageThumbnail({required this.image, required this.onRemove});
+  final dynamic image;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget imageWidget;
+    if (image is File) {
+      imageWidget = Image.file(image, fit: BoxFit.cover, width: 100, height: 100,);
+    } else if (image is String) {
+      imageWidget = Image.network(image, fit: BoxFit.cover, width: 100, height: 100,
+        errorBuilder: (c, e, s) => const Icon(Icons.error_outline),);
+    } else {
+      imageWidget = const Icon(Icons.error);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Stack(
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: imageWidget,
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: onRemove,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
