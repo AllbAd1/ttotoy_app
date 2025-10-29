@@ -1,4 +1,4 @@
-class ToDoEntity {
+class ToDoEntity { // 할 일 엔티티
   ToDoEntity({
     required this.title,
     required this.description,

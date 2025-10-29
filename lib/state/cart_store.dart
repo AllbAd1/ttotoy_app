@@ -38,13 +38,13 @@ class CartStore extends ChangeNotifier {
             previousValue + item.product.price * item.quantity, // 각 아이템의 가격 * 수량 합산
       );
 
-  bool addProduct(Product product, {int quantity = 1}) {
+  bool addProduct(Product product, {int quantity = 1}) { // 상품 추가 메서드
     final key = _productKey(product);
     final existing = _items[key];
     final currentQuantity = existing?.quantity ?? 0;
     final newQuantity = currentQuantity + quantity;
 
-    // ★★★ ProductStore에서 최신 재고 확인 (유지) ★★★
+    // ★★★ ProductStore에서 최신 재고 확인 ★★★
     final currentProductState = _productStore.findProductByName(product.name);
     if (currentProductState == null) {
       debugPrint("Error: Product ${product.name} not found in ProductStore during add.");
@@ -53,15 +53,15 @@ class CartStore extends ChangeNotifier {
     final currentInventory = currentProductState.inventory;
     // ★★★
 
-    // 최신 재고 기준으로 확인 (유지)
+    // 최신 재고 기준으로 확인 
     if (newQuantity > currentInventory) {
       return false; // 재고 부족
     }
 
-    if (existing != null) {
+    if (existing != null) {  // 이미 장바구니에 있는 경우 수량 업데이트
       existing.quantity = newQuantity;
     } else {
-      _items[key] = CartItem(product: currentProductState, quantity: newQuantity);
+      _items[key] = CartItem(product: currentProductState, quantity: newQuantity); // 새 아이템 추가
     }
 
     // ★★★ ProductStore 재고 업데이트 호출 제거 ★★★
@@ -71,12 +71,12 @@ class CartStore extends ChangeNotifier {
     return true;
   }
 
-  bool changeQuantity(Product product, int delta) {
+  bool changeQuantity(Product product, int delta) { // 수량 변경 메서드
     final key = _productKey(product);
     final item = _items[key];
     if (item == null) return false;
 
-    final updatedQuantity = item.quantity + delta;
+    final updatedQuantity = item.quantity + delta; 
 
     // 최소 수량 1 유지
     if (updatedQuantity <= 0) {
@@ -85,7 +85,7 @@ class CartStore extends ChangeNotifier {
       return true; // 제거는 성공으로 간주
     }
 
-    // ★★★ ProductStore에서 최신 재고 확인 (유지) ★★★
+    // ★★★ ProductStore에서 최신 재고 확인 ★★★
     final currentProductState = _productStore.findProductByName(product.name);
     if (currentProductState == null) {
       debugPrint("Error: Product ${product.name} not found in ProductStore during change quantity.");
@@ -94,7 +94,7 @@ class CartStore extends ChangeNotifier {
     final currentInventory = currentProductState.inventory;
     // ★★★
 
-    // 최신 재고 기준으로 확인 (유지)
+    // 최신 재고 기준으로 확인 
      if (updatedQuantity > currentInventory) {
        return false; // 재고 초과
      }
@@ -128,7 +128,7 @@ class CartStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _productKey(Product product) => product.name; // ID 필드가 있다면 그것을 사용하는 것이 더 안전합니다.
+  String _productKey(Product product) => product.name; // ID 필드가 있다면 그것을 사용하는 것이 더 안전함.
 }
 
 class CartProvider extends InheritedNotifier<CartStore> {
@@ -138,10 +138,10 @@ class CartProvider extends InheritedNotifier<CartStore> {
     required super.child,
   }) : super(notifier: store);
 
-  static CartStore of(BuildContext context) {
+  static CartStore of(BuildContext context) { // CartStore 접근 메서드
     final provider =
         context.dependOnInheritedWidgetOfExactType<CartProvider>();
-    assert(provider != null, 'CartProvider not found in context');
+    assert(provider != null, 'CartProvider not found in context'); // 안전성 검사
     return provider!.notifier!;
   }
 }
