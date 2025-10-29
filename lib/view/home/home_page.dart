@@ -149,15 +149,18 @@ class HomePage extends StatelessWidget {
   ) {
     final added = cartStore.addProduct(product); // CartStore가 ProductStore 재고 업데이트 처리
     final messenger = ScaffoldMessenger.of(context);
+    const quickDuration = Duration(milliseconds: 1200);
 
     if (added) {
       messenger.showSnackBar(
-        SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
-      );
+        SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.'),
+        duration: quickDuration, //   duration 설정 추가
+      ));
     } else {
       messenger.showSnackBar(
-        const SnackBar(content: Text('재고 수량을 초과하여 담을 수 없어요.')),
-      );
+        const SnackBar(content: Text('재고 수량을 초과하여 담을 수 없어요.'),
+        duration: quickDuration, //   duration 설정 추가),
+      ));
     }
   }
 }
