@@ -73,7 +73,7 @@ class _AddProductPageState extends State<AddProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    //final theme = Theme.of(context);//    앱 바 우측 상단 save 텍스트버튼 테마 비활성화
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Product', style: TextStyle(fontSize: 20)),
