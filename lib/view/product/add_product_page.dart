@@ -10,6 +10,7 @@ import 'package:flutter/services.dart'; //    TextInputFormatter를 위해 추�
 import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
 
 
+// 가격 입력 필드 포맷터 (쉼표 추가)
 class _PriceFormatter extends TextInputFormatter {
   final NumberFormat formatter = NumberFormat('#,###', 'ko_KR');
 
@@ -20,20 +21,19 @@ class _PriceFormatter extends TextInputFormatter {
   ) {
     // 1. 숫자 이외의 문자 제거
     String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     // 2. 입력값이 없으면 빈 문자열 반환
     if (newText.isEmpty) {
       return TextEditingValue.empty;
     }
 
-    // 3. 숫자로 변환 (최대 999,999,999 등 적절한 제한을 둘 수 있음)
+    // 3. 숫자로 변환
     int value = int.tryParse(newText) ?? 0;
 
-    // 4. 포맷팅 적용 (예: 20000 -> 20,000)
+    // 4. 포맷팅 적용
     String formattedText = formatter.format(value);
 
     // 5. 커서 위치 조정
-    // 포맷팅 후 커서를 문자열 끝으로 이동시킵니다.
     return newValue.copyWith(
       text: formattedText,
       selection: TextSelection.collapsed(offset: formattedText.length),
@@ -50,7 +50,7 @@ class AddProductPage extends StatefulWidget {
 }
 
 class _AddProductPageState extends State<AddProductPage> {
-  // ★★★ 이미지 파일 상태 관리를 위한 변수 추가 ★★★
+  // 이미지 파일 상태 관리를 위한 변수
   File? _selectedFile; // 갤러리에서 선택한 파일
   String? _selectedUrl; // URL로 입력받은 이미지 주소
 
@@ -58,25 +58,16 @@ class _AddProductPageState extends State<AddProductPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  //final _categoryController = TextEditingController();    카테고리 입력칸 삭제
   final _inventoryController = TextEditingController();
   final _sizeController = TextEditingController();
-  //final _colorController = TextEditingController();   컬러 입력칸 삭제
-  /*final NumberFormat _currencyFormatter = NumberFormat.currency(
-    locale: 'ko_KR',
-    symbol: '₩', // 원하는 통화 기호 (₩ 또는 원)
-    decimalDigits: 0, // 소수점 이하 자리수 (0으로 설정하여 정수만 표시)
-  ); */
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    //_categoryController.dispose();    카테고리 입력칸 삭제
     _inventoryController.dispose();
     _sizeController.dispose();
-    //_colorController.dispose();   카테고리 입력칸 삭제
     super.dispose();
   }
 
@@ -91,7 +82,7 @@ class _AddProductPageState extends State<AddProductPage> {
             onPressed: _onSave,
             child: Text(
               'Save',
-              style: theme.textTheme.labelLarge,
+              style: theme.textTheme.labelLarge?.copyWith(color: AppColors.primaryPeach), // 저장 버튼 색상 적용
             ),
           ),
         ],
@@ -103,85 +94,63 @@ class _AddProductPageState extends State<AddProductPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ★★★ _selectedFile과 _selectedUrl을 PhotoPlaceholder에 전달 ★★★
+              // 이미지 선택 영역
               _PhotoPlaceholder(
                 onTap: _onPickPhoto, // 선택 UI 띄우기
                 imageFile: _selectedFile,
                 imageUrl: _selectedUrl,
               ),
               const SizedBox(height: 24),
+              // 상품 이름
               _buildTextField(
                 controller: _titleController,
                 label: '이름',
                 hint: '이름을 입력 해주세요!',
               ),
               const SizedBox(height: 16),
+              // 상품 설명
               _buildTextField(
                 controller: _descriptionController,
                 label: '설명',
                 hint: '설명을 입력 해주세요!',
-                maxLines: 6, //   입력칸 늘림
+                maxLines: 6, // 입력칸 늘림
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _priceController,
-                      label: '가격',
-                      hint: '20,000', //    힌트 텍스트 변경 ₩ >> ₩20,000 >> 20,000
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        _PriceFormatter(),
-                        LengthLimitingTextInputFormatter(11), // 11자리 (9,999,999,999) 제한
-                      ],
-                      //const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                  //    카테고리 입력칸 삭제
-                  /*const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _categoryController,
-                      label: '카테고리',
-                      hint: '남아 or 여아',
-                    ),
-                  ), 
-                  */
-                ],
-              ),
-               const SizedBox(height: 16),
+              // 가격
+              _buildTextField(
+                 controller: _priceController,
+                 label: '가격',
+                 hint: '20,000',
+                 keyboardType: TextInputType.number,
+                 inputFormatters: [
+                   _PriceFormatter(), // 쉼표 포맷터 적용
+                   LengthLimitingTextInputFormatter(11), // 자리수 제한
+                 ],
+               ),
+              const SizedBox(height: 16),
+              // 재고 수량
               _buildTextField(
                 controller: _inventoryController,
-                label: '재고수량', //   '재고 수량' >> '재고수량'으로 변경
+                label: '재고수량',
                 hint: '',
                 keyboardType: TextInputType.number,
+                 inputFormatters: [
+                   FilteringTextInputFormatter.digitsOnly, // 숫자만 입력 허용
+                   LengthLimitingTextInputFormatter(5), // 예: 최대 5자리
+                 ]
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _sizeController,
-                      label: '사용연령',
-                      hint: '3~6개월', //    영어를 한글로 변경, '예시 0~3개월' >> '3~6개월' 변경
-                    ),
-                  ),
-                  //    색상 입력칸 삭제
-                  /*const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _colorController,
-                      label: '색상',
-                      hint: '',
-                    ),
-                  ),*/
-                ],
-              ),
+              // 사용 연령
+              _buildTextField(
+                 controller: _sizeController,
+                 label: '사용연령',
+                 hint: '3~6개월',
+               ),
             ],
           ),
         ),
       ),
+      // 하단 저장 버튼
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -200,50 +169,71 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
+  // 공통 텍스트 필드 빌더
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required String hint,
     TextInputType? keyboardType,
     int maxLines = 1,
-    List<TextInputFormatter>? inputFormatters, //   추가된 매개변수
+    List<TextInputFormatter>? inputFormatters, // 포맷터 추가
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      inputFormatters: inputFormatters,//   inputFormaters 적용
+      inputFormatters: inputFormatters,// inputFormatters 적용
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixText: (controller == _priceController) ? '₩' : null, //   가격입력 시, ₩자동설정
+        prefixText: (controller == _priceController) ? '₩' : null, // 가격 필드에 '₩' 추가
         hintStyle: TextStyle(
-        color: Colors.grey.shade400, //   힌트텍스트 컬러 변경 : 기존보다 더 연한 회색 (예: grey.shade400)
-      ),
+          color: Colors.grey.shade400, // 힌트 텍스트 색상 연하게
+        ),
         filled: true,
         fillColor: Colors.white,
         isDense: true,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //    설명 텍스트 위로 정렬
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // 패딩 조정
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder( // 기본 테두리
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
+        ),
+        focusedBorder: OutlineInputBorder( // 포커스 시 테두리
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: AppColors.primaryPeach, width: 1.5),
         ),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return '$label을(를) 입력해 주세요.';
         }
+        // 가격 필드 추가 검증 (선택적)
+        if (controller == _priceController) {
+          final priceInput = value.trim().replaceAll(RegExp(r'[^0-9]'), '');
+          if (priceInput.isEmpty || (double.tryParse(priceInput) ?? 0) <= 0) {
+            return '올바른 가격을 입력해 주세요.';
+          }
+        }
+         // 재고 필드 추가 검증 (선택적)
+        if (controller == _inventoryController) {
+          final invInput = value.trim();
+          if (invInput.isEmpty || (int.tryParse(invInput) ?? -1) < 0) {
+             return '올바른 재고 수량을 입력해 주세요.';
+          }
+        }
         return null;
       },
     );
   }
 
-  // ★★★ 갤러리 또는 URL 선택 UI 띄우기 (수정됨) ★★★
+  // 갤러리 또는 URL 선택 UI 띄우기
   void _onPickPhoto() {
-    // 키보드가 열려있으면 닫기
-    FocusScope.of(context).unfocus();
-    
+    FocusScope.of(context).unfocus(); // 키보드 닫기
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -273,7 +263,7 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // ★★★ 갤러리에서 이미지 가져오기 로직 (수정됨) ★★★
+  // 갤러리에서 이미지 가져오기
   Future<void> _getImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
@@ -286,7 +276,7 @@ class _AddProductPageState extends State<AddProductPage> {
     }
   }
 
-  // ★★★ URL 입력 다이얼로그 띄우기 (신규 추가) ★★★
+  // URL 입력 다이얼로그
   Future<void> _showUrlInputDialog() async {
     final urlController = TextEditingController();
     final result = await showDialog<String>(
@@ -297,6 +287,7 @@ class _AddProductPageState extends State<AddProductPage> {
           content: TextField(
             controller: urlController,
             decoration: const InputDecoration(hintText: 'https://...'),
+            keyboardType: TextInputType.url,
             autofocus: true,
           ),
           actions: [
@@ -307,8 +298,15 @@ class _AddProductPageState extends State<AddProductPage> {
             TextButton(
               child: const Text('확인'),
               onPressed: () {
-                if (urlController.text.trim().isNotEmpty) {
-                  Navigator.of(context).pop(urlController.text.trim());
+                final url = urlController.text.trim();
+                // 간단한 URL 유효성 검사 (http 또는 https로 시작하는지)
+                if (url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'))) {
+                   Navigator.of(context).pop(url);
+                } else {
+                   // 유효하지 않은 URL 알림 (선택적)
+                   ScaffoldMessenger.of(context).showSnackBar(
+                     const SnackBar(content: Text('유효한 URL을 입력해 주세요.')),
+                   );
                 }
               },
             ),
@@ -325,10 +323,12 @@ class _AddProductPageState extends State<AddProductPage> {
     }
   }
 
+  // 저장 로직
   void _onSave() {
+    // 폼 유효성 검사
     if (_formKey.currentState?.validate() != true) return;
 
-    // ★★★ 이미지 선택 검증 (파일 또는 URL) (수정됨) ★★★
+    // 이미지 선택 검증
     if (_selectedFile == null && _selectedUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('이미지를 선택해 주세요.')),
@@ -336,60 +336,55 @@ class _AddProductPageState extends State<AddProductPage> {
       return;
     }
 
-    //final normalizedPrice =_priceController.text.trim().replaceAll(',', '.');
+    // 가격 파싱 (쉼표 제거 후 double로)
     final priceInput = _priceController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
-    //normalizedPrice.replaceAll(RegExp(r'[^0-9.]'), '');
     final price = double.tryParse(priceInput);
+
+    // 재고 파싱 (int로)
     final inventory = int.tryParse(_inventoryController.text.trim());
 
-    if (price == null || price <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('가격이 올바르지 않습니다.')),
-      );
-      return;
-    }
+    // 가격, 재고 null 체크 및 0 이하 체크 (validator에서 이미 했지만 한번 더 확인)
+    if (price == null || price <= 0 || inventory == null || inventory < 0) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         const SnackBar(content: Text('가격 또는 재고 수량이 올바르지 않습니다.')),
+       );
+       return;
+     }
 
-    if (inventory == null || inventory <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('재고수량을 올바르게 입력해 주세요.')), //   '재고 수량' >> '재고수량' 변경
-      );
-      return;
-    }
 
-    // ★★★ 이미지 경로 결정 (URL 우선) (신규 추가) ★★★
+    // 이미지 경로 결정 (URL 우선)
     final String imageAssetPath;
     if (_selectedUrl != null && _selectedUrl!.isNotEmpty) {
       imageAssetPath = _selectedUrl!;
     } else {
       // 실제 앱에서는 파일을 서버에 업로드하고 URL을 받아야 합니다.
-      // 여기서는 시연을 위해 로컬 파일 경로를 임시로 사용합니다.
+      // 시연용으로는 로컬 파일 경로를 사용합니다.
       imageAssetPath = _selectedFile!.path;
     }
 
 
+    // Product 객체 생성
     final product = Product(
       name: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: price,
-      // ★★★ 선택된 이미지 파일의 경로를 사용 (수정됨) ★★★
-      imageAsset: imageAssetPath,
+      imageAsset: imageAssetPath, // 결정된 이미지 경로 사용
       inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
-          ? '0-3개월' //    영어를 한글로 변경
+          ? '0-3개월' // 기본값 설정
           : _sizeController.text.trim(),
-      //    컬러 입력칸 삭제
-      /*color: (_colorController.text.trim().isEmpty)
-          ? 'Gray'
-          : _colorController.text.trim(),
-          */
     );
 
-    ProductProvider.of(context).addProduct(product);
+    // ProductStore에 상품 추가
+    // listen: false 옵션으로 build 메서드 외부에서 Provider 호출
+    ProductProvider.of(context, listen: false).addProduct(product);
+
+    // 이전 화면으로 돌아가기
     Navigator.of(context).pop();
   }
 }
 
-// ★★★ _PhotoPlaceholder 위젯 수정 (URL 표시 기능 추가) ★★★
+// 이미지 플레이스홀더 위젯 (수정됨)
 class _PhotoPlaceholder extends StatelessWidget {
   const _PhotoPlaceholder({
     required this.onTap,
@@ -409,35 +404,44 @@ class _PhotoPlaceholder extends StatelessWidget {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       content = Image.network(
         imageUrl!,
-        fit: BoxFit.cover,
         width: double.infinity,
         height: 180,
-        // URL 로딩 중 에러 처리
+        fit: BoxFit.cover, // 이미지가 영역을 꽉 채우도록
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
         },
         errorBuilder: (context, error, stackTrace) {
+          // URL 로드 실패 시 에러 아이콘 표시
           return Center(
-            child: Icon(
-              Icons.error_outline,
-              color: Colors.grey.shade400, //   컬러 연하게 수정
-              //color: AppColors.descriptionGray,
-              size: 48,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.grey.shade400,
+                  size: 48,
+                ),
+                 const SizedBox(height: 8),
+                 Text(
+                   '이미지 로드 실패',
+                   style: TextStyle(color: Colors.grey.shade600),
+                 ),
+              ],
             ),
           );
         },
       );
-    } 
+    }
     // 2. 갤러리 파일이 있으면 파일 이미지 표시
     else if (imageFile != null) {
       content = Image.file(
         imageFile!,
-        fit: BoxFit.cover,
         width: double.infinity,
         height: 180,
+        fit: BoxFit.cover, // 이미지가 영역을 꽉 채우도록
       );
-    } 
+    }
     // 3. 둘 다 없으면 기본 아이콘 표시
     else {
       content = Column(
@@ -445,8 +449,7 @@ class _PhotoPlaceholder extends StatelessWidget {
         children: [
           Icon(
             Icons.add_photo_alternate_outlined,
-            color: Colors.grey.shade400,//    컬러 연하게 수정
-            //color: AppColors.descriptionGray,
+            color: Colors.grey.shade400,
             size: 48,
           ),
           const SizedBox(height: 8),
@@ -466,16 +469,17 @@ class _PhotoPlaceholder extends StatelessWidget {
         height: 180,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.grey.shade100, // 배경색 약간 추가
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.descriptionGray.withValues(alpha: 0.3),
+            color: Colors.grey.shade300, // 테두리 색상 연하게
+            // color: AppColors.descriptionGray.withValues(alpha: 0.3), // 이전 코드
           ),
         ),
-        // ClipRRect로 감싸서 이미지가 둥근 모서리를 넘지 않도록 함
+        // ClipRRect로 Container의 child를 감싸서 내용물이 경계를 넘지 않도록 함
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: content,
+          borderRadius: BorderRadius.circular(16.0), // Container와 동일한 radius 적용
+          child: content, // content (Image 또는 Column)를 child로 넣음
         ),
       ),
     );
