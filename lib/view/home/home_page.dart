@@ -1,4 +1,6 @@
+import 'dart:io'; // ★★★ 파일 이미지를 위해 import 추가 ★★★
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // ★★★ 1. 원화 포맷을 위해 import 추가 ★★★
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
@@ -7,6 +9,14 @@ import '../../state/product_store.dart';
 import '../cart/cart_page.dart';
 import '../product/add_product_page.dart';
 import '../ttotoy_detail/ttotoy_detail_page.dart';
+
+// ★★★ 2. 원화 포맷 함수 정의 추가 ★★★
+String formatCurrency(double price) {
+  final format =
+      NumberFormat.currency(locale: 'ko_KR', symbol: '₩', decimalDigits: 0);
+  return format.format(price.round());
+}
+// ★★★
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -55,8 +65,9 @@ class HomePage extends StatelessWidget {
                   }
                   return ListView.separated(
                     itemCount: products.length,
-                    separatorBuilder: (_, __) 
-                     {return const SizedBox(height: 12);},
+                    separatorBuilder: (_, __) {
+                      return const SizedBox(height: 12);
+                    },
                     itemBuilder: (context, index) {
                       final product = products[index];
                       return _ProductCard(
@@ -200,11 +211,10 @@ class _ProductCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                product.imageAsset,
+              child: _ProductImage(
+                imageUrl: product.imageAsset,
                 width: 70,
                 height: 70,
-                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(width: 12),
@@ -231,11 +241,10 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                   //'₩${product.price.toStringAsFixed(0)}',
-                    formatCurrency(product.price), //   원화 형식 변경 ₩20,000원 형태
+                    //'₩${product.price.toStringAsFixed(0)}',
+                    formatCurrency(product.price), //   ★ 이제 정상 작동합니다 ★
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: AppColors.primaryPeach,
-              
                     ),
                   ),
                 ],
@@ -256,5 +265,85 @@ class _ProductCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 (변경 없음) ★★★
+class _ProductImage extends StatelessWidget {
+  const _ProductImage({
+    required this.imageUrl,
+    this.width = 70.0,
+    this.height = 70.0,
+  });
+
+  final String imageUrl;
+  final double width;
+  final double height;
+
+  // 공통 에러 위젯
+  Widget _buildErrorWidget() {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey[200],
+      child: Icon(
+        Icons.broken_image_outlined,
+        color: Colors.grey[400],
+        size: 40,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl.startsWith('http')) {
+      // 1. 인터넷 URL 이미지
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            width: width,
+            height: height,
+            color: Colors.grey[200],
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else if (imageUrl.startsWith('assets/')) {
+      // 2. 앱 내부 에셋 이미지
+      return Image.asset(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else {
+      // 3. 기기 갤러리에서 가져온 로컬 파일 이미지
+      final file = File(imageUrl);
+      if (imageUrl.isNotEmpty && file.existsSync()) {
+        return Image.file(
+          file,
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildErrorWidget();
+          },
+        );
+      } else {
+        // 4. 경로가 잘못되었거나 파일이 없는 경우
+        return _buildErrorWidget();
+      }
+    }
   }
 }
