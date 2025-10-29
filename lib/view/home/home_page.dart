@@ -165,7 +165,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// _ProductCard 클래스 (변경 없음)
+// _ProductCard 클래스 
 class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
@@ -178,13 +178,13 @@ class _ProductCard extends StatelessWidget {
   final VoidCallback onAdd;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { // _ProductCard build 메서드
     final theme = Theme.of(context);
-    return InkWell(
+    return InkWell(  // InkWell으로 변경
       borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
+      onTap: onTap,  // 전체 카드를 누를 때 상세 페이지로 이동
+      child: Container(  // 카드 컨테이너
+        decoration: BoxDecoration( // 카드 스타일
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
@@ -195,11 +195,11 @@ class _ProductCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12), // 내부 패딩 추가
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12), // 이미지 모서리 둥글게
               child: _ProductImage(
                 imageUrl: product.imageAsset,
                 width: 70,
@@ -209,44 +209,44 @@ class _ProductCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
                 children: [
                   Text(
                     product.name,
-                    style: theme.textTheme.titleLarge,
+                    style: theme.textTheme.titleLarge, // 상품 이름 스타일
                   ),
                   const SizedBox(height: 4),
                   Text(
                     product.description,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium,  // 상품 설명 스타일
                     maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,  // 설명이 길면 ...으로 표시
                   ),
                   const SizedBox(height: 6),
                   Text(
                     '재고: ${product.inventory}개', // 재고 표시
                     style: theme.textTheme.titleMedium
-                        ?.copyWith(color: AppColors.descriptionGray),
+                        ?.copyWith(color: AppColors.descriptionGray), // 재고 스타일
                   ),
                   const SizedBox(height: 6),
                   Text(
                     formatCurrency(product.price), // 원화 형식 변경 ₩20,000원 형태
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: AppColors.primaryPeach,
+                      color: AppColors.primaryPeach, // 가격 스타일
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 12), // 이미지와 버튼 사이 간격
             SizedBox(
               width: 90,
-              child: ElevatedButton(
+              child: ElevatedButton( // 추가 버튼
                 onPressed: onAdd,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(0, 44),
+                style: ElevatedButton.styleFrom(  // 버튼 스타일
+                  minimumSize: const Size(0, 44), // 버튼 높이 고정
                 ),
-                child: const Text('Add'),
+                child: const Text('Add'), // 버튼 텍스트
               ),
             ),
           ],
@@ -256,8 +256,8 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// _ProductImage 위젯 (변경 없음)
-class _ProductImage extends StatelessWidget {
+// _ProductImage 위젯 
+class _ProductImage extends StatelessWidget {  // 이미지 로딩 위젯
   const _ProductImage({
     required this.imageUrl,
     this.width = 70.0,
@@ -282,50 +282,50 @@ class _ProductImage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { // 이미지 빌드 메서드
     if (imageUrl.startsWith('http')) {
       return Image.network(
         imageUrl,
         width: width,
         height: height,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) {
+        loadingBuilder: (context, child, progress) { // 로딩 중 위젯
           if (progress == null) return child;
           return Container(
             width: width,
             height: height,
             color: Colors.grey[200],
-            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),  // 로딩 인디케이터
           );
         },
-        errorBuilder: (context, error, stackTrace) {
-          return _buildErrorWidget();
+        errorBuilder: (context, error, stackTrace) {  // 에러 처리 위젯
+          return _buildErrorWidget();  // 에러 시 대체 위젯 반환
         },
       );
-    } else if (imageUrl.startsWith('assets/')) {
+    } else if (imageUrl.startsWith('assets/')) {  // 에셋 이미지 처리
       return Image.asset(
         imageUrl,
         width: width,
         height: height,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
+        errorBuilder: (context, error, stackTrace) { // 에러 처리 위젯
           return _buildErrorWidget();
         },
       );
     } else {
-      final file = File(imageUrl);
-      if (imageUrl.isNotEmpty && file.existsSync()) {
-        return Image.file(
+      final file = File(imageUrl);  // 로컬 파일 이미지 처리
+      if (imageUrl.isNotEmpty && file.existsSync()) {  // 파일 존재 여부 확인
+        return Image.file( // 파일 이미지 로드
           file,
           width: width,
           height: height,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildErrorWidget();
+          errorBuilder: (context, error, stackTrace) {  // 에러 처리 위젯
+            return _buildErrorWidget(); // 파일 로드 에러 시 대체 위젯 반환
           },
         );
       } else {
-        return _buildErrorWidget();
+        return _buildErrorWidget(); // 파일이 없을 경우 대체 위젯 반환
       }
     }
   }
