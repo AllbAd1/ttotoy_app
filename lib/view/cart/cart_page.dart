@@ -98,7 +98,8 @@ class CartPage extends StatelessWidget { //cart page 클래스 시작
 
                                   // 5. (선택적) 결제 완료 메시지
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('결제가 완료되었습니다.')),
+                                    const SnackBar(content: Text('결제가 완료되었습니다.'),
+                                    duration: Duration(milliseconds: 1200),),
                                   );
                                 },
                                 // ★★★ (수정 완료) ★★★
@@ -199,7 +200,8 @@ class _CartItemCard extends StatelessWidget {  // CartItem 카드 위젯
                   cartStore.changeQuantity(cartItem.product, delta);  // 수량 변경 시도
               if (!success && delta > 0) { // 증가 시에만 재고 부족 메시지 표시
                 ScaffoldMessenger.of(context).showSnackBar( // 스낵바 표시
-                  const SnackBar(content: Text('재고 수량을 초과할 수 없어요.')),
+                  const SnackBar(content: Text('재고 수량을 초과할 수 없어요.'),
+                  duration: Duration(milliseconds: 1200),),
                 );
               }
             },
