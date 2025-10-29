@@ -212,15 +212,13 @@ class _AddProductPageState extends State<AddProductPage> {
         if (value == null || value.trim().isEmpty) {
           return '$label을(를) 입력해 주세요.';
         }
-        // 가격 필드 추가 검증 (선택적)
         if (controller == _priceController) {
           final priceInput = value.trim().replaceAll(RegExp(r'[^0-9]'), '');
           if (priceInput.isEmpty || (double.tryParse(priceInput) ?? 0) <= 0) {
             return '올바른 가격을 입력해 주세요.';
           }
         }
-         // 재고 필드 추가 검증 (선택적)
-        if (controller == _inventoryController) {
+         if (controller == _inventoryController) {
           final invInput = value.trim();
           if (invInput.isEmpty || (int.tryParse(invInput) ?? -1) < 0) {
              return '올바른 재고 수량을 입력해 주세요.';
@@ -299,11 +297,9 @@ class _AddProductPageState extends State<AddProductPage> {
               child: const Text('확인'),
               onPressed: () {
                 final url = urlController.text.trim();
-                // 간단한 URL 유효성 검사 (http 또는 https로 시작하는지)
                 if (url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'))) {
                    Navigator.of(context).pop(url);
                 } else {
-                   // 유효하지 않은 URL 알림 (선택적)
                    ScaffoldMessenger.of(context).showSnackBar(
                      const SnackBar(content: Text('유효한 URL을 입력해 주세요.')),
                    );
@@ -325,10 +321,7 @@ class _AddProductPageState extends State<AddProductPage> {
 
   // 저장 로직
   void _onSave() {
-    // 폼 유효성 검사
     if (_formKey.currentState?.validate() != true) return;
-
-    // 이미지 선택 검증
     if (_selectedFile == null && _selectedUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('이미지를 선택해 주세요.')),
@@ -336,14 +329,10 @@ class _AddProductPageState extends State<AddProductPage> {
       return;
     }
 
-    // 가격 파싱 (쉼표 제거 후 double로)
     final priceInput = _priceController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
     final price = double.tryParse(priceInput);
-
-    // 재고 파싱 (int로)
     final inventory = int.tryParse(_inventoryController.text.trim());
 
-    // 가격, 재고 null 체크 및 0 이하 체크 (validator에서 이미 했지만 한번 더 확인)
     if (price == null || price <= 0 || inventory == null || inventory < 0) {
        ScaffoldMessenger.of(context).showSnackBar(
          const SnackBar(content: Text('가격 또는 재고 수량이 올바르지 않습니다.')),
@@ -351,40 +340,30 @@ class _AddProductPageState extends State<AddProductPage> {
        return;
      }
 
-
-    // 이미지 경로 결정 (URL 우선)
     final String imageAssetPath;
     if (_selectedUrl != null && _selectedUrl!.isNotEmpty) {
       imageAssetPath = _selectedUrl!;
     } else {
-      // 실제 앱에서는 파일을 서버에 업로드하고 URL을 받아야 합니다.
-      // 시연용으로는 로컬 파일 경로를 사용합니다.
       imageAssetPath = _selectedFile!.path;
     }
 
-
-    // Product 객체 생성
     final product = Product(
       name: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       price: price,
-      imageAsset: imageAssetPath, // 결정된 이미지 경로 사용
+      imageAsset: imageAssetPath,
       inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
           ? '0-3개월' // 기본값 설정
           : _sizeController.text.trim(),
     );
 
-    // ProductStore에 상품 추가
-    // listen: false 옵션으로 build 메서드 외부에서 Provider 호출
     ProductProvider.of(context, listen: false).addProduct(product);
-
-    // 이전 화면으로 돌아가기
     Navigator.of(context).pop();
   }
 }
 
-// 이미지 플레이스홀더 위젯 (수정됨)
+// ★★★ _PhotoPlaceholder 위젯 수정 (BoxFit.contain 적용) ★★★
 class _PhotoPlaceholder extends StatelessWidget {
   const _PhotoPlaceholder({
     required this.onTap,
@@ -406,7 +385,8 @@ class _PhotoPlaceholder extends StatelessWidget {
         imageUrl!,
         width: double.infinity,
         height: 180,
-        fit: BoxFit.cover, // 이미지가 영역을 꽉 채우도록
+        // ★★★ BoxFit.contain으로 변경하여 이미지 전체가 보이도록 함 ★★★
+        fit: BoxFit.contain,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return const Center(child: CircularProgressIndicator(strokeWidth: 2));
@@ -439,7 +419,8 @@ class _PhotoPlaceholder extends StatelessWidget {
         imageFile!,
         width: double.infinity,
         height: 180,
-        fit: BoxFit.cover, // 이미지가 영역을 꽉 채우도록
+        // ★★★ BoxFit.contain으로 변경하여 이미지 전체가 보이도록 함 ★★★
+        fit: BoxFit.contain,
       );
     }
     // 3. 둘 다 없으면 기본 아이콘 표시
@@ -473,16 +454,16 @@ class _PhotoPlaceholder extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Colors.grey.shade300, // 테두리 색상 연하게
-            // color: AppColors.descriptionGray.withValues(alpha: 0.3), // 이전 코드
           ),
         ),
-        // ClipRRect로 Container의 child를 감싸서 내용물이 경계를 넘지 않도록 함
+        // ClipRRect는 이미지 비율과 관계없이 둥근 모서리를 적용하기 위해 유지
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.0), // Container와 동일한 radius 적용
-          child: content, // content (Image 또는 Column)를 child로 넣음
+          borderRadius: BorderRadius.circular(16.0),
+          child: content,
         ),
       ),
     );
   }
 }
+
 
