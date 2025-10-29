@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import '../../state/cart_store.dart';
 
+import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
+
+
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
@@ -87,11 +90,18 @@ class _CartItemCard extends StatelessWidget {
   const _CartItemCard({required this.cartItem});
 
   final CartItem cartItem;
+  
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cartStore = CartProvider.of(context);
+    final currencyFormat = NumberFormat.currency(
+      locale: 'ko_KR',        //    한국 로케일 (쉼표 그룹핑)
+      symbol: '₩',            //    통화 기호 설정
+      decimalDigits: 0,       //    소수점 자리수 없음
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -135,7 +145,8 @@ class _CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '₩${cartItem.product.price.toStringAsFixed(0)}',
+                  currencyFormat.format(cartItem.product.price),
+                  //'₩${cartItem.product.price.toStringAsFixed(0)}',
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: AppColors.primaryPeach,
                   ),
@@ -209,6 +220,13 @@ class _CartSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    //    원화 포맷터 추가
+    final currencyFormat = NumberFormat.currency(
+      locale: 'ko_KR',
+      symbol: '₩',
+      decimalDigits: 0,
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -223,7 +241,8 @@ class _CartSummary extends StatelessWidget {
             style: theme.textTheme.titleMedium,
           ),
           Text(
-            '₩${total.toStringAsFixed(0)}',
+            currencyFormat.format(total),
+            //'₩${total.toStringAsFixed(0)}',
             style: theme.textTheme.titleLarge?.copyWith(
               color: AppColors.primaryPeach,
               fontSize: 18,
