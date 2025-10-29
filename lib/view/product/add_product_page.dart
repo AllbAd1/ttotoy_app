@@ -77,6 +77,7 @@ class _AddProductPageState extends State<AddProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Product', style: TextStyle(fontSize: 20)),
+        /*  앱바 옆 저장버튼 비활성화
         actions: [
           TextButton(
             onPressed: _onSave,
@@ -86,6 +87,7 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
           ),
         ],
+        */
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
