@@ -25,8 +25,8 @@ void main() {
   );
 }
 
-class TtoToyApp extends StatelessWidget {
-  const TtoToyApp({super.key});
+class TtoToyApp extends StatelessWidget { // StatelessWidget 사용
+  const TtoToyApp({super.key}); 
 
   @override
   Widget build(BuildContext context) {
