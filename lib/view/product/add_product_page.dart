@@ -217,6 +217,9 @@ class _AddProductPageState extends State<AddProductPage> {
         labelText: label,
         hintText: hint,
         prefixText: (controller == _priceController) ? '₩' : null, //   가격입력 시, ₩자동설정
+        hintStyle: TextStyle(
+        color: Colors.grey.shade400, //   힌트텍스트 컬러 변경 : 기존보다 더 연한 회색 (예: grey.shade400)
+      ),
         filled: true,
         fillColor: Colors.white,
         isDense: true,
@@ -418,7 +421,8 @@ class _PhotoPlaceholder extends StatelessWidget {
           return Center(
             child: Icon(
               Icons.error_outline,
-              color: AppColors.descriptionGray,
+              color: Colors.grey.shade400, //   컬러 연하게 수정
+              //color: AppColors.descriptionGray,
               size: 48,
             ),
           );
@@ -441,7 +445,8 @@ class _PhotoPlaceholder extends StatelessWidget {
         children: [
           Icon(
             Icons.add_photo_alternate_outlined,
-            color: AppColors.descriptionGray,
+            color: Colors.grey.shade400,//    컬러 연하게 수정
+            //color: AppColors.descriptionGray,
             size: 48,
           ),
           const SizedBox(height: 8),
