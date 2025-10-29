@@ -123,7 +123,6 @@ class ProductDetailPage extends StatelessWidget {  // StatelessWidget 사용
   }
 }
 
-// ★★★ 첫 번째 _DetailTile 정의 (유지) ★★★
 class _DetailTile extends StatelessWidget {  // 상품 상세 정보 타일 위젯
   const _DetailTile({required this.label, required this.value});
 
@@ -156,7 +155,7 @@ class _DetailTile extends StatelessWidget {  // 상품 상세 정보 타일 위�
   }
 }
 
-// ★★★ 첫 번째 _ProductDetailImage 정의 (유지) ★★★
+// ★★★ 이미지 로더 위젯 수정 (BoxFit.contain 적용) ★★★
 class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
   const _ProductDetailImage({
     required this.imageUrl,
@@ -190,7 +189,8 @@ class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
         imageUrl,
         width: width,
         height: height,
-        fit: BoxFit.cover,
+        // ★★★ BoxFit.contain으로 변경 ★★★
+        fit: BoxFit.contain,
         loadingBuilder: (context, child, progress) {  // 로딩 중 위젯
           if (progress == null) return child;  // 로딩 완료 시 이미지 반환
           return Container(
@@ -210,7 +210,8 @@ class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
         imageUrl,
         width: width,
         height: height,
-        fit: BoxFit.cover,
+        // ★★★ BoxFit.contain으로 변경 ★★★
+        fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) { // 에러 처리 위젯
           return _buildErrorWidget();  // 에러 시 대체 위젯 반환
         },
@@ -224,7 +225,8 @@ class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
           file,
           width: width,
           height: height,
-          fit: BoxFit.cover,
+          // ★★★ BoxFit.contain으로 변경 ★★★
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             return _buildErrorWidget();
           },
