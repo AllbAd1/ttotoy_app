@@ -53,7 +53,7 @@ class CartPage extends StatelessWidget {
                   onPressed: () {
                     showDialog(context: context, barrierDismissible: true, builder:(BuildContext context){
                       return AlertDialog(
-                        title: const Text('상품주문이 완료되었습니다'),
+                        title: const Text('결제를 하시겠습니까?'),
                         content: const Text('상품을 구매해주셔서 감사합니다 \n BY Liferary'),
                         actions: [
                           TextButton(onPressed: () => Navigator.pop(context),
