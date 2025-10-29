@@ -1,10 +1,10 @@
+import 'dart:io'; // ★★★ 파일 이미지를 위해 import 추가 ★★★
 import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 import '../../state/cart_store.dart';
 
 import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
-
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -54,28 +54,32 @@ class CartPage extends StatelessWidget {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () {
-                    showDialog(context: context, barrierDismissible: true, builder:(BuildContext context){
-                      return AlertDialog(
-                        title: const Text('결제를 하시겠습니까?'),
-                        content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(context),
-                          child: const Text('취소'),
-                          ),
-                          ElevatedButton(onPressed: (){
-                            cartStore.clear();
-                            Navigator.pop(context);
-                          }, child: const Text('확인') ),
-                        ],
-                      );
-                    } );
-                  
+                    showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('결제를 하시겠습니까?'),
+                            content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('취소'),
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    cartStore.clear();
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('확인')),
+                            ],
+                          );
+                        });
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 54),
                   ),
                   child: const Text('결제하러 가기'),
-                  
                 ),
               ],
             ),
@@ -90,16 +94,15 @@ class _CartItemCard extends StatelessWidget {
   const _CartItemCard({required this.cartItem});
 
   final CartItem cartItem;
-  
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cartStore = CartProvider.of(context);
     final currencyFormat = NumberFormat.currency(
-      locale: 'ko_KR',        //    한국 로케일 (쉼표 그룹핑)
-      symbol: '₩',            //    통화 기호 설정
-      decimalDigits: 0,       //    소수점 자리수 없음
+      locale: 'ko_KR', //    한국 로케일 (쉼표 그룹핑)
+      symbol: '₩', //    통화 기호 설정
+      decimalDigits: 0, //    소수점 자리수 없음
     );
 
     return Container(
@@ -127,12 +130,13 @@ class _CartItemCard extends StatelessWidget {
           const SizedBox(width: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              cartItem.product.imageAsset,
+            // ★★★ 이미지 로더 위젯으로 변경 ★★★
+            child: _CartProductImage(
+              imageUrl: cartItem.product.imageAsset,
               width: 70,
               height: 70,
-              fit: BoxFit.cover,
             ),
+            // ★★★ (기존 Image.asset() 삭제) ★★★
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -251,5 +255,85 @@ class _CartSummary extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 (신규 추가) ★★★
+class _CartProductImage extends StatelessWidget {
+  const _CartProductImage({
+    required this.imageUrl,
+    this.width = 70.0,
+    this.height = 70.0,
+  });
+
+  final String imageUrl;
+  final double width;
+  final double height;
+
+  // 공통 에러 위젯
+  Widget _buildErrorWidget() {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey[200],
+      child: Icon(
+        Icons.broken_image_outlined,
+        color: Colors.grey[400],
+        size: 40,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl.startsWith('http')) {
+      // 1. 인터넷 URL 이미지
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            width: width,
+            height: height,
+            color: Colors.grey[200],
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else if (imageUrl.startsWith('assets/')) {
+      // 2. 앱 내부 에셋 이미지
+      return Image.asset(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else {
+      // 3. 기기 갤러리에서 가져온 로컬 파일 이미지
+      final file = File(imageUrl);
+      if (imageUrl.isNotEmpty && file.existsSync()) {
+        return Image.file(
+          file,
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildErrorWidget();
+          },
+        );
+      } else {
+        // 4. 경로가 잘못되었거나 파일이 없는 경우
+        return _buildErrorWidget();
+      }
+    }
   }
 }
