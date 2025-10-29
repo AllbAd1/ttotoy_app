@@ -5,7 +5,6 @@ import '../../state/cart_store.dart';
 
 import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
 
-
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
@@ -30,9 +29,7 @@ class CartPage extends StatelessWidget {
         builder: (context, _) {
           final items = cartStore.items;
           if (items.isEmpty) {
-            return const Center(
-              child: Text('장바구니가 비어 있어요.'),
-            );
+            return const Center(child: Text('장바구니가 비어 있어요.'));
           }
           final totalPrice = cartStore.totalPrice;
           return Padding(
@@ -54,28 +51,78 @@ class CartPage extends StatelessWidget {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () {
-                    showDialog(context: context, barrierDismissible: true, builder:(BuildContext context){
-                      return AlertDialog(
-                        title: const Text('결제를 하시겠습니까?'),
-                        content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(context),
-                          child: const Text('취소'),
-                          ),
-                          ElevatedButton(onPressed: (){
-                            cartStore.clear();
-                            Navigator.pop(context);
-                          }, child: const Text('확인') ),
-                        ],
-                      );
-                    } );
-                  
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('결제를 하시겠습니까?'),
+                          content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
+                          actions: [
+                            // 1. 취소 버튼을 ElevatedButton으로 수정
+                            ElevatedButton(
+                              // style을 지정하여 버튼의 높이를 약간 줄일 수 있습니다.
+                              // 또는 최소한의 패딩을 주어 작게 보이게 할 수 있습니다.
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(80, 40), // 버튼 크기 지정
+                                backgroundColor:
+                                    Colors.grey.shade200, // 취소 버튼은 배경색을 다르게
+                                foregroundColor: Colors.black87,
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('취소'),
+                            ),
+
+                            // 2. 확인 버튼 (이미 ElevatedButton이었지만 스타일을 통일할 수 있습니다)
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(80, 40), // 버튼 크기 지정
+                                // 확인 버튼은 Primary 색상 (테마 색상)을 유지합니다.
+                              ),
+                              onPressed: () {
+                                cartStore.clear();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('확인'),
+
+                              /*actions: [
+                            //    취소 버튼 (왼쪽에 배치)
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('취소'),
+                            ),
+                            //    확인 버튼 (오른쪽에 배치, 액션 실행)
+                            TextButton(
+                              // <-- ElevatedButton 대신 TextButton 사용
+                              onPressed: () {
+                                cartStore.clear();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('확인'),*/
+                              //   확인 취소 둘 다 텍스트버젼일 때
+
+                              /* actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('취소'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                cartStore.clear();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('확인'), */
+                              //    처음 방식
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 54),
                   ),
                   child: const Text('결제하러 가기'),
-                  
                 ),
               ],
             ),
@@ -90,16 +137,15 @@ class _CartItemCard extends StatelessWidget {
   const _CartItemCard({required this.cartItem});
 
   final CartItem cartItem;
-  
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cartStore = CartProvider.of(context);
     final currencyFormat = NumberFormat.currency(
-      locale: 'ko_KR',        //    한국 로케일 (쉼표 그룹핑)
-      symbol: '₩',            //    통화 기호 설정
-      decimalDigits: 0,       //    소수점 자리수 없음
+      locale: 'ko_KR', //    한국 로케일 (쉼표 그룹핑)
+      symbol: '₩', //    통화 기호 설정
+      decimalDigits: 0, //    소수점 자리수 없음
     );
 
     return Container(
@@ -139,10 +185,7 @@ class _CartItemCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  cartItem.product.name,
-                  style: theme.textTheme.titleLarge,
-                ),
+                Text(cartItem.product.name, style: theme.textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(
                   currencyFormat.format(cartItem.product.price),
@@ -158,8 +201,7 @@ class _CartItemCard extends StatelessWidget {
           _QuantityControl(
             quantity: cartItem.quantity,
             onChanged: (delta) {
-              final success =
-                  cartStore.changeQuantity(cartItem.product, delta);
+              final success = cartStore.changeQuantity(cartItem.product, delta);
               if (!success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('재고 수량을 초과할 수 없어요.')),
@@ -197,10 +239,7 @@ class _QuantityControl extends StatelessWidget {
             color: theme.colorScheme.primary,
             onPressed: () => onChanged(-1),
           ),
-          Text(
-            '$quantity',
-            style: theme.textTheme.titleMedium,
-          ),
+          Text('$quantity', style: theme.textTheme.titleMedium),
           IconButton(
             icon: const Icon(Icons.add),
             color: theme.colorScheme.primary,
@@ -236,10 +275,7 @@ class _CartSummary extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            '합계',
-            style: theme.textTheme.titleMedium,
-          ),
+          Text('합계', style: theme.textTheme.titleMedium),
           Text(
             currencyFormat.format(total),
             //'₩${total.toStringAsFixed(0)}',
