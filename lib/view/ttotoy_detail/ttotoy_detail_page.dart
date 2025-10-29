@@ -1,6 +1,6 @@
 import 'dart:io'; // 파일 이미지를 위해 import 추가
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // 원화 포맷을 위해 import 추가
+import 'package:flutter/material.dart'; // ★★★ 오타 수정 (package. -> package:) ★★★
+import 'package:intl/intl.dart'; // ★★★ 오타 수정 (package. -> package:) ★★★
 
 import '../../constants/colors.dart'; // AppColors import
 import '../../core/product.dart';  // Product 모델 import
@@ -14,14 +14,33 @@ String formatCurrency(double price) {
   return format.format(price.round());  // 소수점 없이 반올림하여 포맷팅
 }
 
-class ProductDetailPage extends StatelessWidget {  // StatelessWidget 사용
+// ★★★ StatelessWidget -> StatefulWidget으로 변경 ★★★
+class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({super.key, required this.product});
 
   final Product product;  // 전달된 Product 객체
 
   @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  // ★★★ 현재 이미지 페이지 추적을 위한 변수 추가 ★★★
+  int _currentPage = 0;
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // ★★★ StatefulWidget에서는 widget.product로 접근 ★★★
+    final product = widget.product;
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -38,15 +57,57 @@ class ProductDetailPage extends StatelessWidget {  // StatelessWidget 사용
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,  // 왼쪽 정렬
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(24), // 이미지 모서리 둥글게 처리
-              child: _ProductDetailImage(  // 이미지 로더 위젯 사용
-                imageUrl: product.imageAsset, // 이미지 경로 전달
-                height: 240,
-                width: double.infinity, // 화면 가로 전체 너비
+            // ★★★ 이미지 스와이퍼(PageView)로 변경 ★★★
+            SizedBox(
+              height: 240,
+              child: PageView.builder(
+                controller: _pageController,
+                // ★★★ imageAssets 리스트 사용 ★★★
+                itemCount: product.imageAssets.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final imageUrl = product.imageAssets[index];
+                  // ★★★ 확대 기능을 위해 GestureDetector 추가 ★★★
+                  return GestureDetector(
+                    onTap: () => _showImageDialog(context, imageUrl),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: _ProductDetailImage(
+                        imageUrl: imageUrl,
+                        height: 240,
+                        width: double.infinity,
+                        fit: BoxFit.contain, // 상세 페이지 이미지는 contain으로 설정
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 20), // 이미지와 텍스트 사이 간격
+            // ★★★ 페이지 인디케이터(점) 추가 ★★★
+            if (product.imageAssets.length > 1)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(product.imageAssets.length, (index) {
+                  return Container(
+                    width: 8.0,
+                    height: 8.0,
+                    margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentPage == index
+                          ? AppColors.primaryPeach
+                          : Colors.grey.shade400,
+                    ),
+                  );
+                }),
+              ),
+            const SizedBox(height: 10), // 인디케이터와 텍스트 사이 간격
+
+            // (이하 상세 정보는 동일)
             Text(
               product.name,
               style: theme.textTheme.titleLarge?.copyWith(fontSize: 22), // 글자 크기 조정
@@ -104,31 +165,74 @@ class ProductDetailPage extends StatelessWidget {  // StatelessWidget 사용
     );
   }
 
-  void _addToCartAndGo(BuildContext context) {  // 장바구니 추가 및 이동 함수
-    final cartStore = CartProvider.of(context);  // CartStore 가져오기
-    final added = cartStore.addProduct(product); // 장바구니에 상품 추가 시도
+  // ★★★ 장바구니 추가 함수 (StatefulWidget에 맞게 수정) ★★★
+  void _addToCartAndGo(BuildContext context) {
+    final cartStore = CartProvider.of(context);
+    // ★★★ widget.product로 접근 ★★★
+    final added = cartStore.addProduct(widget.product);
     if (added) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.'),
-        duration: const Duration(milliseconds: 1200),), // 1.2초 지속시간 설정
+        SnackBar(content: Text('${widget.product.name}이(가) 장바구니에 담겼어요.'),
+        duration: const Duration(milliseconds: 1200),),
       );
-      Navigator.of(context).push(  // 장바구니 페이지로 이동
+      Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const CartPage()),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(  // 실패 메시지
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('재고 수량을 초과하여 담을 수 없어요.')),
       );
     }
   }
+
+  // ★★★ 이미지 확대 다이얼로그 함수 (신규 추가) ★★★
+  void _showImageDialog(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(10), // 화면 여백
+          child: Stack(
+            alignment: Alignment.topRight,
+            children: [
+              // InteractiveViewer를 사용해 확대/축소/이동 가능
+              InteractiveViewer(
+                panEnabled: true,
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: _ProductDetailImage(
+                  imageUrl: imageUrl,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  fit: BoxFit.contain, // 확대 시에는 contain이 적합
+                ),
+              ),
+              // 닫기 버튼
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: IconButton.styleFrom(
+                    // ★★★ withOpacity -> withAlpha로 수정 ★★★
+                    backgroundColor: Colors.black.withAlpha(128), // (0.5 * 255 = 128)
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
-class _DetailTile extends StatelessWidget {  // 상품 상세 정보 타일 위젯
+// _DetailTile 클래스 (기존과 동일)
+class _DetailTile extends StatelessWidget {
   const _DetailTile({required this.label, required this.value});
-
-  final String label;  // 타일 라벨
-  final String value;  // 타일 값
-
+  final String label;
+  final String value;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -155,27 +259,29 @@ class _DetailTile extends StatelessWidget {  // 상품 상세 정보 타일 위�
   }
 }
 
-// ★★★ 이미지 로더 위젯 수정 (BoxFit.contain 적용) ★★★
-class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
+// ★★★ _ProductDetailImage 클래스 (fit 속성을 매개변수로 받도록 수정) ★★★
+class _ProductDetailImage extends StatelessWidget {
   const _ProductDetailImage({
     required this.imageUrl,
     this.width = double.infinity,
     this.height = 240.0,
+    this.fit = BoxFit.contain, // ★★★ fit 기본값을 contain으로 변경 ★★★
   });
 
-  final String imageUrl;  // 이미지 경로 (URL, 로컬 파일 경로, 앱 에셋 경로)
+  final String imageUrl;
   final double width;
   final double height;
+  final BoxFit fit; // ★★★ fit 속성 추가 ★★★
 
   // 공통 에러 위젯
-  Widget _buildErrorWidget() { // 에러 시 표시할 위젯
+  Widget _buildErrorWidget() {
     return Container(
       width: width,
       height: height,
-      color: Colors.grey[200], // 배경색
+      color: Colors.grey[200],
       child: Icon(
-        Icons.broken_image_outlined, // 깨진 이미지 아이콘
-        color: Colors.grey[400], // 아이콘 색상
+        Icons.broken_image_outlined,
+        color: Colors.grey[400],
         size: 60,
       ),
     );
@@ -185,23 +291,22 @@ class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
   Widget build(BuildContext context) {
     if (imageUrl.startsWith('http')) {
       // 1. 인터넷 URL 이미지
-      return Image.network(  // 네트워크 이미지 로드
+      return Image.network(
         imageUrl,
         width: width,
         height: height,
-        // ★★★ BoxFit.contain으로 변경 ★★★
-        fit: BoxFit.contain,
-        loadingBuilder: (context, child, progress) {  // 로딩 중 위젯
-          if (progress == null) return child;  // 로딩 완료 시 이미지 반환
+        fit: fit, // ★★★ 매개변수로 받은 fit 사용 ★★★
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
           return Container(
             width: width,
             height: height,
             color: Colors.grey[200],
-            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),  // 로딩 인디케이터
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
           );
         },
-        errorBuilder: (context, error, stackTrace) {  // 에러 처리 위젯
-          return _buildErrorWidget();  // 에러 시 대체 위젯 반환
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
         },
       );
     } else if (imageUrl.startsWith('assets/')) {
@@ -210,30 +315,27 @@ class _ProductDetailImage extends StatelessWidget {  // 이미지 로더 위젯
         imageUrl,
         width: width,
         height: height,
-        // ★★★ BoxFit.contain으로 변경 ★★★
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) { // 에러 처리 위젯
-          return _buildErrorWidget();  // 에러 시 대체 위젯 반환
+        fit: fit, // ★★★ 매개변수로 받은 fit 사용 ★★★
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
         },
       );
     } else {
       // 3. 기기 갤러리에서 가져온 로컬 파일 이미지
       final file = File(imageUrl);
-      // (경로가 비어있지 않은지 확인)
       if (imageUrl.isNotEmpty && file.existsSync()) {
         return Image.file(
           file,
           width: width,
           height: height,
-          // ★★★ BoxFit.contain으로 변경 ★★★
-          fit: BoxFit.contain,
+          fit: fit, // ★★★ 매개변수로 받은 fit 사용 ★★★
           errorBuilder: (context, error, stackTrace) {
             return _buildErrorWidget();
           },
         );
       } else {
         // 4. 경로가 잘못되었거나 파일이 없는 경우
-        return _buildErrorWidget(); // 에러 시 대체 위젯 반환
+        return _buildErrorWidget();
       }
     }
   }
