@@ -1,6 +1,6 @@
-import 'dart:io'; // ★★★ 파일 이미지를 위해 import 추가 ★★★
+import 'dart:io'; // 파일 이미지를 위해 import 추가
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // ★★★ 1. 원화 포맷을 위해 import 추가 ★★★
+import 'package:intl/intl.dart'; // 원화 포맷을 위해 import 추가
 
 import '../../constants/colors.dart';
 import '../../core/product.dart';
@@ -10,13 +10,12 @@ import '../cart/cart_page.dart';
 import '../product/add_product_page.dart';
 import '../ttotoy_detail/ttotoy_detail_page.dart';
 
-// ★★★ 2. 원화 포맷 함수 정의 추가 ★★★
+// 원화 포맷 함수 정의
 String formatCurrency(double price) {
   final format =
       NumberFormat.currency(locale: 'ko_KR', symbol: '₩', decimalDigits: 0);
   return format.format(price.round());
 }
-// ★★★
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -24,8 +23,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final productStore = ProductProvider.of(context); // 전역 상품 상태
+    // CartStore는 여기서 한번만 가져와도 괜찮습니다.
     final cartStore = CartProvider.of(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -36,32 +36,35 @@ class HomePage extends StatelessWidget {
           'TtoToy',
           style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
-        /*
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
-            color: AppColors.descriptionGray,
-            onPressed: () => _openCart(context),
-          ),
-        ],
-        */
+        /* actions 생략 */
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /* 검색바 삭제 (주석처리)
-            _SearchBar(theme: theme),
-            const SizedBox(height: 20),
-            */
+            /* 검색바 삭제 (주석처리) */
             Expanded(
               child: AnimatedBuilder(
-                animation: productStore,
+                // ★★★ ProductProvider.of(context)를 직접 animation으로 전달하여 구독 ★★★
+                animation: ProductProvider.of(context),
                 builder: (context, _) {
-                  final products = productStore.products;
+                  // ★★★ builder 내부에서 Provider.of를 다시 호출하여 최신 상태 가져오기 ★★★
+                  final productStore = ProductProvider.of(context);
+                  final allProducts = productStore.products;
+
+                  // 디버그 로그 (유지)
+                  debugPrint("--- HomePage Rebuilding ---");
+                  allProducts.forEach((p) => debugPrint("  ${p.name}: inventory=${p.inventory}"));
+                  debugPrint("-------------------------");
+
+                  // 재고 필터링 (기존 로직 유지)
+                  final products = allProducts
+                      .where((p) => p.inventory > 0)
+                      .toList();
+
                   if (products.isEmpty) {
-                    return const Center(child: Text('등록된 상품이 없습니다.'));
+                    return const Center(child: Text('판매중인 상품이 없습니다.'));
                   }
                   return ListView.separated(
                     itemCount: products.length,
@@ -70,9 +73,11 @@ class HomePage extends StatelessWidget {
                     },
                     itemBuilder: (context, index) {
                       final product = products[index];
+                      debugPrint("  Building card for ${product.name} with inventory: ${product.inventory}");
                       return _ProductCard(
                         product: product,
                         onTap: () => _openDetail(context, product),
+                        // ★★★ cartStore는 build 메서드에서 가져온 것을 사용 ★★★
                         onAdd: () => _addToCart(context, cartStore, product),
                       );
                     },
@@ -135,13 +140,15 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  // ★★★ _addToCart 함수에서 불필요한 주석 및 임시 코드 제거 완료 ★★★
   void _addToCart(
     BuildContext context,
     CartStore cartStore,
     Product product,
   ) {
-    final added = cartStore.addProduct(product);
+    final added = cartStore.addProduct(product); // CartStore가 ProductStore 재고 업데이트 처리
     final messenger = ScaffoldMessenger.of(context);
+
     if (added) {
       messenger.showSnackBar(
         SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
@@ -153,30 +160,8 @@ class HomePage extends StatelessWidget {
     }
   }
 }
-// 검색바 클래스 삭제 (주석처리)
-/*class _SearchBar extends StatelessWidget {
-  const _SearchBar({required this.theme});
 
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'Search',
-        prefixIcon: const Icon(Icons.search),
-        filled: true,
-        fillColor: theme.colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-}
-*/
+// _ProductCard 클래스 (변경 없음)
 class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
@@ -235,14 +220,13 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '재고: ${product.inventory}개',
+                    '재고: ${product.inventory}개', // 재고 표시
                     style: theme.textTheme.titleMedium
                         ?.copyWith(color: AppColors.descriptionGray),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    //'₩${product.price.toStringAsFixed(0)}',
-                    formatCurrency(product.price), //   ★ 이제 정상 작동합니다 ★
+                    formatCurrency(product.price), // 원화 형식 변경 ₩20,000원 형태
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: AppColors.primaryPeach,
                     ),
@@ -268,7 +252,7 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 (변경 없음) ★★★
+// _ProductImage 위젯 (변경 없음)
 class _ProductImage extends StatelessWidget {
   const _ProductImage({
     required this.imageUrl,
@@ -280,7 +264,6 @@ class _ProductImage extends StatelessWidget {
   final double width;
   final double height;
 
-  // 공통 에러 위젯
   Widget _buildErrorWidget() {
     return Container(
       width: width,
@@ -297,7 +280,6 @@ class _ProductImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imageUrl.startsWith('http')) {
-      // 1. 인터넷 URL 이미지
       return Image.network(
         imageUrl,
         width: width,
@@ -317,7 +299,6 @@ class _ProductImage extends StatelessWidget {
         },
       );
     } else if (imageUrl.startsWith('assets/')) {
-      // 2. 앱 내부 에셋 이미지
       return Image.asset(
         imageUrl,
         width: width,
@@ -328,7 +309,6 @@ class _ProductImage extends StatelessWidget {
         },
       );
     } else {
-      // 3. 기기 갤러리에서 가져온 로컬 파일 이미지
       final file = File(imageUrl);
       if (imageUrl.isNotEmpty && file.existsSync()) {
         return Image.file(
@@ -341,9 +321,9 @@ class _ProductImage extends StatelessWidget {
           },
         );
       } else {
-        // 4. 경로가 잘못되었거나 파일이 없는 경우
         return _buildErrorWidget();
       }
     }
   }
 }
+
