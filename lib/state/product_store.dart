@@ -46,13 +46,13 @@ class ProductStore extends ChangeNotifier { // ChangeNotifier 상속
   UnmodifiableListView<Product> get products =>
       UnmodifiableListView<Product>(_products); // 외부에 읽기 전용 리스트 제공
 
-  // 새 상품 추가 로직 (기존 코드 유지)
+  // 새 상품 추가 로직 
   void addProduct(Product product) {
     _products.insert(0, product); // 리스트 맨 앞에 추가
     notifyListeners(); // 상태 변경 알림
   }
 
-  // 상품 이름으로 Product 객체 찾기 함수 (기존 코드 유지)
+  // 상품 이름으로 Product 객체 찾기 함수 
   Product? findProductByName(String name) {
     try {
       return _products.firstWhere((p) => p.name == name);
@@ -61,7 +61,7 @@ class ProductStore extends ChangeNotifier { // ChangeNotifier 상속
     }
   }
 
-  // 재고 업데이트 함수 (기존 코드 유지)
+  // 재고 업데이트 함수 
   void updateInventory(Product product, int delta) {
     final index = _products.indexWhere((p) => p.name == product.name);
 
