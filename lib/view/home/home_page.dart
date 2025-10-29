@@ -95,7 +95,7 @@ class HomePage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_box_outlined),
-            label: 'Add',
+            label: 'Upload',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag_outlined),
