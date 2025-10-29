@@ -6,6 +6,42 @@ import '../../constants/colors.dart';
 import '../../core/product.dart';
 import '../../state/product_store.dart';
 
+import 'package:flutter/services.dart'; //    TextInputFormatter를 위해 추가
+import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
+
+
+class _PriceFormatter extends TextInputFormatter {
+  final NumberFormat formatter = NumberFormat('#,###', 'ko_KR');
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // 1. 숫자 이외의 문자 제거
+    String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    // 2. 입력값이 없으면 빈 문자열 반환
+    if (newText.isEmpty) {
+      return TextEditingValue.empty;
+    }
+
+    // 3. 숫자로 변환 (최대 999,999,999 등 적절한 제한을 둘 수 있음)
+    int value = int.tryParse(newText) ?? 0;
+
+    // 4. 포맷팅 적용 (예: 20000 -> 20,000)
+    String formattedText = formatter.format(value);
+
+    // 5. 커서 위치 조정
+    // 포맷팅 후 커서를 문자열 끝으로 이동시킵니다.
+    return newValue.copyWith(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
+    );
+  }
+}
+
+
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
 
@@ -26,6 +62,11 @@ class _AddProductPageState extends State<AddProductPage> {
   final _inventoryController = TextEditingController();
   final _sizeController = TextEditingController();
   //final _colorController = TextEditingController();   컬러 입력칸 삭제
+  /*final NumberFormat _currencyFormatter = NumberFormat.currency(
+    locale: 'ko_KR',
+    symbol: '₩', // 원하는 통화 기호 (₩ 또는 원)
+    decimalDigits: 0, // 소수점 이하 자리수 (0으로 설정하여 정수만 표시)
+  ); */
 
   @override
   void dispose() {
@@ -88,9 +129,13 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildTextField(
                       controller: _priceController,
                       label: '가격',
-                      hint: '₩20,000', //    힌트 텍스트 변경 ₩ >> ₩20,000
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      hint: '20,000', //    힌트 텍스트 변경 ₩ >> ₩20,000 >> 20,000
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        _PriceFormatter(),
+                        LengthLimitingTextInputFormatter(11), // 11자리 (9,999,999,999) 제한
+                      ],
+                      //const TextInputType.numberWithOptions(decimal: true),
                     ),
                   ),
                   //    카테고리 입력칸 삭제
@@ -161,14 +206,17 @@ class _AddProductPageState extends State<AddProductPage> {
     required String hint,
     TextInputType? keyboardType,
     int maxLines = 1,
+    List<TextInputFormatter>? inputFormatters, //   추가된 매개변수
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      inputFormatters: inputFormatters,//   inputFormaters 적용
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        prefixText: (controller == _priceController) ? '₩' : null, //   가격입력 시, ₩자동설정
         filled: true,
         fillColor: Colors.white,
         isDense: true,
@@ -285,12 +333,10 @@ class _AddProductPageState extends State<AddProductPage> {
       return;
     }
 
-    final normalizedPrice =
-        _priceController.text.trim().replaceAll(',', '.');
-    final priceInput =
-        normalizedPrice.replaceAll(RegExp(r'[^0-9.]'), '');
+    //final normalizedPrice =_priceController.text.trim().replaceAll(',', '.');
+    final priceInput = _priceController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
+    //normalizedPrice.replaceAll(RegExp(r'[^0-9.]'), '');
     final price = double.tryParse(priceInput);
-
     final inventory = int.tryParse(_inventoryController.text.trim());
 
     if (price == null || price <= 0) {
