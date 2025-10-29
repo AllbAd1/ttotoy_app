@@ -132,7 +132,7 @@ class _AddProductPageState extends State<AddProductPage> {
               _buildTextField(
                 controller: _inventoryController,
                 label: '재고수량',
-                hint: '',
+                hint: '숫자만 입력하세요',
                 keyboardType: TextInputType.number,
                  inputFormatters: [
                    FilteringTextInputFormatter.digitsOnly, // 숫자만 입력 허용

@@ -112,7 +112,8 @@ class ProductDetailPage extends StatelessWidget {
     final added = cartStore.addProduct(product);
     if (added) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.')),
+        SnackBar(content: Text('${product.name}이(가) 장바구니에 담겼어요.'),
+        duration: Duration(milliseconds: 1200),),
       );
       Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const CartPage()),
