@@ -150,6 +150,13 @@ class _AddProductPageState extends State<AddProductPage> {
                   */
                 ],
               ),
+               const SizedBox(height: 16),
+              _buildTextField(
+                controller: _inventoryController,
+                label: '재고수량', //   '재고 수량' >> '재고수량'으로 변경
+                hint: '',
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -170,13 +177,6 @@ class _AddProductPageState extends State<AddProductPage> {
                     ),
                   ),*/
                 ],
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: _inventoryController,
-                label: '재고수량', //   '재고 수량' >> '재고수량'으로 변경
-                hint: '',
-                keyboardType: TextInputType.number,
               ),
             ],
           ),
