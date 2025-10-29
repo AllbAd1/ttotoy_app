@@ -55,9 +55,10 @@ class HomePage extends StatelessWidget {
 
                   // 디버그 로그 (유지)
                   debugPrint("--- HomePage Rebuilding ---");
-                  allProducts.forEach((p) => debugPrint("  ${p.name}: inventory=${p.inventory}"));
+                  for (var p in allProducts) { // for-in 루프 사용
+                    debugPrint("  ${p.name}: inventory=${p.inventory}");
+                  }
                   debugPrint("-------------------------");
-
                   // 재고 필터링 (기존 로직 유지)
                   final products = allProducts
                       .where((p) => p.inventory > 0)
