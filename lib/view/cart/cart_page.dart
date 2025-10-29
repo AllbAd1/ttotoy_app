@@ -54,7 +54,7 @@ class CartPage extends StatelessWidget {
                     showDialog(context: context, barrierDismissible: true, builder:(BuildContext context){
                       return AlertDialog(
                         title: const Text('결제를 하시겠습니까?'),
-                        content: const Text('상품을 구매해주셔서 감사합니다 \n BY Liferary'),
+                        content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
                         actions: [
                           TextButton(onPressed: () => Navigator.pop(context),
                           child: const Text('취소'),
