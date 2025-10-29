@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 import '../../state/cart_store.dart';
+// ★★★ CartItem 이름을 숨겨서 가져옵니다 ★★★
+import '../../core/product.dart' hide CartItem;
+// ★★★ (기존 import '../../core/product.dart'; 삭제) ★★★
 
 import 'package:intl/intl.dart'; //   금액 포맷팅을 위해 추가
 
@@ -28,6 +31,7 @@ class CartPage extends StatelessWidget {
       body: AnimatedBuilder(
         animation: cartStore,
         builder: (context, _) {
+          // ★★★ 여기서 사용하는 items와 CartItem은 이제 cart_store.dart에서 온 것입니다 ★★★
           final items = cartStore.items;
           if (items.isEmpty) {
             return const Center(
@@ -62,8 +66,6 @@ class CartPage extends StatelessWidget {
                             title: const Text('결제를 하시겠습니까?'),
                             content: const Text('확인 버튼을 누르면 결제가 진행됩니다'),
                             actions: [
-                              // ★★★ 충돌 해결: ttotoy_jiwon 브랜치 코드 선택 ★★★
-                              // 1. 취소 버튼 (ElevatedButton)
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(80, 40), // 버튼 크기 지정
@@ -74,12 +76,9 @@ class CartPage extends StatelessWidget {
                                 onPressed: () => Navigator.pop(context),
                                 child: const Text('취소'),
                               ),
-
-                              // 2. 확인 버튼 (ElevatedButton)
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(80, 40), // 버튼 크기 지정
-                                  // 확인 버튼은 Primary 색상 (테마 색상)을 유지합니다.
                                 ),
                                 onPressed: () {
                                   cartStore.clear();
@@ -87,7 +86,6 @@ class CartPage extends StatelessWidget {
                                 },
                                 child: const Text('확인'),
                               ),
-                              // ★★★ (충돌 마커 및 main 브랜치 코드 제거) ★★★
                             ],
                           );
                         });
@@ -107,6 +105,7 @@ class CartPage extends StatelessWidget {
 }
 
 class _CartItemCard extends StatelessWidget {
+  // ★★★ 여기서 사용하는 CartItem은 이제 cart_store.dart에서 온 것입니다 ★★★
   const _CartItemCard({required this.cartItem});
 
   final CartItem cartItem;
@@ -139,6 +138,7 @@ class _CartItemCard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.delete_outline),
             color: AppColors.descriptionGray,
+            // ★★★ 여기서 사용하는 product는 core/product.dart의 Product입니다 ★★★
             onPressed: () => cartStore.removeProduct(cartItem.product),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -175,10 +175,11 @@ class _CartItemCard extends StatelessWidget {
           const SizedBox(width: 12),
           _QuantityControl(
             quantity: cartItem.quantity,
+            inventory: cartItem.product.inventory,
             onChanged: (delta) {
               final success =
                   cartStore.changeQuantity(cartItem.product, delta);
-              if (!success) {
+              if (!success && delta > 0) { // 증가 시에만 재고 부족 메시지 표시
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('재고 수량을 초과할 수 없어요.')),
                 );
@@ -192,14 +193,22 @@ class _CartItemCard extends StatelessWidget {
 }
 
 class _QuantityControl extends StatelessWidget {
-  const _QuantityControl({required this.quantity, required this.onChanged});
+  const _QuantityControl({
+    required this.quantity,
+    required this.inventory,
+    required this.onChanged
+  });
 
   final int quantity;
+  final int inventory;
   final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bool canDecrease = quantity > 1;
+    final bool canIncrease = quantity < inventory;
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -212,8 +221,8 @@ class _QuantityControl extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.remove),
-            color: theme.colorScheme.primary,
-            onPressed: () => onChanged(-1),
+            color: canDecrease ? theme.colorScheme.primary : Colors.grey,
+            onPressed: canDecrease ? () => onChanged(-1) : null,
           ),
           Text(
             '$quantity',
@@ -221,8 +230,8 @@ class _QuantityControl extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.add),
-            color: theme.colorScheme.primary,
-            onPressed: () => onChanged(1),
+            color: canIncrease ? theme.colorScheme.primary : Colors.grey,
+            onPressed: canIncrease ? () => onChanged(1) : null,
           ),
         ],
       ),
@@ -238,7 +247,6 @@ class _CartSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    //    원화 포맷터 추가
     final currencyFormat = NumberFormat.currency(
       locale: 'ko_KR',
       symbol: '₩',
@@ -272,7 +280,6 @@ class _CartSummary extends StatelessWidget {
   }
 }
 
-// ★★★ URL, 로컬 파일, 앱 에셋을 모두 처리하는 이미지 위젯 (변경 없음) ★★★
 class _CartProductImage extends StatelessWidget {
   const _CartProductImage({
     required this.imageUrl,
@@ -284,7 +291,6 @@ class _CartProductImage extends StatelessWidget {
   final double width;
   final double height;
 
-  // 공통 에러 위젯
   Widget _buildErrorWidget() {
     return Container(
       width: width,
@@ -301,7 +307,6 @@ class _CartProductImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imageUrl.startsWith('http')) {
-      // 1. 인터넷 URL 이미지
       return Image.network(
         imageUrl,
         width: width,
@@ -321,7 +326,6 @@ class _CartProductImage extends StatelessWidget {
         },
       );
     } else if (imageUrl.startsWith('assets/')) {
-      // 2. 앱 내부 에셋 이미지
       return Image.asset(
         imageUrl,
         width: width,
@@ -332,7 +336,6 @@ class _CartProductImage extends StatelessWidget {
         },
       );
     } else {
-      // 3. 기기 갤러리에서 가져온 로컬 파일 이미지
       final file = File(imageUrl);
       if (imageUrl.isNotEmpty && file.existsSync()) {
         return Image.file(
@@ -345,7 +348,6 @@ class _CartProductImage extends StatelessWidget {
           },
         );
       } else {
-        // 4. 경로가 잘못되었거나 파일이 없는 경우
         return _buildErrorWidget();
       }
     }
