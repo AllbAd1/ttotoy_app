@@ -70,7 +70,7 @@ class _AddProductPageState extends State<AddProductPage> {
     //_categoryController.dispose();    카테고리 입력칸 삭제
     _inventoryController.dispose();
     _sizeController.dispose();
-    //_colorController.dispose();   컬러 입력칸 삭제
+    //_colorController.dispose();   카테고리 입력칸 삭제
     super.dispose();
   }
 
@@ -131,7 +131,7 @@ class _AddProductPageState extends State<AddProductPage> {
                  keyboardType: TextInputType.number,
                  inputFormatters: [
                    _PriceFormatter(), // 쉼표 포맷터 적용
-                   LengthLimitingTextInputFormatter(11), // 11자리 (9,999,999,999) 제한 (이제 정상 작동)
+                   LengthLimitingTextInputFormatter(11), // 자리수 제한 (이제 정상 작동)
                  ],
                ),
               const SizedBox(height: 16),
@@ -181,13 +181,13 @@ class _AddProductPageState extends State<AddProductPage> {
     required String hint,
     TextInputType? keyboardType,
     int maxLines = 1,
-    List<TextInputFormatter>? inputFormatters, //   추가된 매개변수
+    List<TextInputFormatter>? inputFormatters, // 포맷터 추가
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      inputFormatters: inputFormatters,//   inputFormaters 적용
+      inputFormatters: inputFormatters,// inputFormatters 적용
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
@@ -349,6 +349,8 @@ class _AddProductPageState extends State<AddProductPage> {
   // ★★★ 저장 로직 (imageAssets로 수정) ★★★
   void _onSave() {
     if (_formKey.currentState?.validate() != true) return;
+
+    // 이미지 선택 검증
     if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('이미지를 1개 이상 선택해 주세요.')),
@@ -370,9 +372,9 @@ class _AddProductPageState extends State<AddProductPage> {
     // _images 리스트를 String 리스트로 변환
     final List<String> imagePaths = _images.map((image) {
       if (image is File) {
-        return image.path;
+        return image.path; // File 객체면 경로(path) 반환
       }
-      return image as String;
+      return image as String; // String(URL)이면 그대로 반환
     }).toList();
 
 
@@ -384,7 +386,7 @@ class _AddProductPageState extends State<AddProductPage> {
       imageAssets: imagePaths,
       inventory: inventory,
       size: (_sizeController.text.trim().isEmpty)
-          ? '0-3개월'
+          ? '0-3개월' //    영어를 한글로 변경
           : _sizeController.text.trim(),
     );
 
@@ -393,7 +395,7 @@ class _AddProductPageState extends State<AddProductPage> {
   }
 }
 
-// ( _PhotoGrid, _AddPhotoButton, _ImageThumbnail 위젯은 기존과 동일 )
+// ★★★ _PhotoGrid, _AddPhotoButton, _ImageThumbnail 위젯 (기존과 동일) ★★★
 class _PhotoGrid extends StatelessWidget {
   const _PhotoGrid({
     required this.images,
@@ -408,12 +410,13 @@ class _PhotoGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100,
+      height: 100, // 그리드 높이
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: images.length + 1,
+        itemCount: images.length + 1, // 추가 버튼 포함
         itemBuilder: (context, index) {
           if (index == 0) {
+            // 첫 번째 아이템: 사진 추가 버튼
             return _AddPhotoButton(onTap: onAdd);
           }
           final imageIndex = index - 1;
