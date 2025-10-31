@@ -5,6 +5,7 @@ import 'package:intl/intl.dart'; // 원화 포맷을 위해 import 추가
 import '../../constants/colors.dart';
 import '../../core/product.dart';
 import '../../state/cart_store.dart';
+import '../../state/auth_provider.dart';
 import '../../state/product_store.dart';
 import '../cart/cart_page.dart';
 import '../product/add_product_page.dart';
@@ -36,7 +37,21 @@ class HomePage extends StatelessWidget {
           'TtoToy',
           style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
-        /* actions 생략 */
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'logout') {
+                _handleLogout(context);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'logout',
+                child: Text('로그아웃'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -161,6 +176,18 @@ class HomePage extends StatelessWidget {
         const SnackBar(content: Text('재고 수량을 초과하여 담을 수 없어요.'),
         duration: quickDuration, //   duration 설정 추가),
       ));
+    }
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final authStore = AuthProvider.of(context, listen: false);
+    try {
+      await authStore.signOut();
+    } catch (e) {
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      messenger?.showSnackBar(
+        const SnackBar(content: Text('로그아웃에 실패했어요. 다시 시도해주세요.')),
+      );
     }
   }
 }
